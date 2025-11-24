@@ -1,0 +1,61 @@
+{% load custom_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>This Week's Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid black;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>This Week's Report (Generated on: {{ report_date }})</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Sr. No.</th>
+                <th>User Email</th>
+                <th>No. of Questions Uploaded</th>
+                <th>No. of Idioms/Phrases Uploaded</th>
+                <th>No. of Input Suggestions Uploaded</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user_data in this_week_questions %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ user_data.created_by.email }}</td>
+            <td>{{ user_data.total_questions }}</td>
+            <td>
+                {% for idiom_data in this_week_idioms %}
+                    {% if idiom_data.created_by == user_data.created_by %}
+                        {{ idiom_data.total_idioms }}
+                    {% endif %}
+                {% endfor %}
+            </td>
+            <td>
+                {% for suggestion_data in this_week_input_suggestions %}
+                    {% if suggestion_data.created_by == user_data.created_by %}
+                        {{ suggestion_data.total_suggestions }}
+                    {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

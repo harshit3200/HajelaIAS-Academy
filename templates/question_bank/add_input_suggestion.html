@@ -1,0 +1,673 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block title %}Add Input Suggestion{% endblock %}
+
+{% block custom_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock custom_css %}
+
+{% block content %}
+<style>
+  .exam-tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 5px;
+  }
+
+  .exam-tag {
+    background-color: #ffeeba;
+    color: #333;
+    border: 1px solid #f0c36d;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .exam-tag:hover {
+    background-color: #ffeb99;
+  }
+</style>
+
+<div class="container-xxl py-5">
+  <div class="container">
+    {% if messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {% for message in messages %}
+      {{ message }}
+      {% endfor %}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <div class="text-center">
+      <h6 class="section-title bg-white text-center text-primary px-3">Add Input Suggestion</h6>
+      <h1 class="mb-5">Fill the details to add new input suggestion</h1>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- ✅ Multi-Language -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-6 mb-4">
+          <label for="language" class="form-label">Language(s)</label>
+          <select class="form-select select2" id="language" name="language" multiple required>
+            <option value="e">English</option>
+            <option value="h">Hindi</option>
+          </select>
+          <div class="form-text">Hold Ctrl (Windows) or Command (Mac) to select multiple languages.</div>
+        </div>
+      </div>
+
+      <!-- ✅ Text Fields -->
+      <div class="mb-4">
+        <label for="creditOrCourtesyContainer" class="form-label">Credit / Courtesy</label>
+
+        <!-- Container for dynamic credit inputs -->
+        <div id="creditOrCourtesyContainer">
+          <div class="input-group mb-2">
+            <input type="text" name="credit_or_courtesy[]" class="form-control" placeholder="Enter credit or courtesy">
+            <button type="button" class="btn btn-outline-secondary add-credit-btn">+</button>
+          </div>
+        </div>
+
+        <div class="form-text">Add multiple credits or courtesy entries as needed.</div>
+      </div>
+
+      <div class="mb-4">
+        <label for="source" class="form-label">Source</label>
+        <select name="source" id="source" class="form-select select2" required>
+          <option value="self">Self</option>
+          <option value="social_media">Social Media (SM)</option>
+          <option value="print_media">Print Media</option>
+          <option value="electronic_media">Electronic Media</option>
+          <option value="others">Others</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+  <label for="brief_description" class="form-label">Brief Description</label>
+  <textarea name="brief_description" id="brief_description" class="form-control"></textarea>
+</div>
+
+<div class="mb-4">
+  <label for="details" class="form-label">Details</label>
+  <textarea name="details" id="details" class="form-control"></textarea>
+</div>
+
+      <div class="mb-4">
+        <label for="question_links" class="form-label">Resource Links</label>
+        
+        <!-- Container for dynamic link inputs -->
+        <div id="questionLinksContainer">
+          <div class="input-group mb-2">
+            <input type="url" name="question_link[]" class="form-control" placeholder="https://example.com/resource">
+            <button type="button" class="btn btn-outline-secondary add-link-btn">+</button>
+          </div>
+        </div>
+        
+        <div class="form-text">Add multiple links as needed.</div>
+      </div>
+
+
+      <div class="mb-4">
+        <label for="other_text" class="form-label">Other Text</label>
+        <textarea name="other_text" id="other_text" class="form-control"></textarea>
+      </div>
+
+      <!-- ✅ Files -->
+      <div class="mb-4">
+        <label for="question_video" class="form-label">Upload Video</label>
+        <input type="file" name="question_video" id="question_video" class="form-control" accept="video/*" multiple>
+      </div>
+
+      <div class="mb-4">
+        <label for="question_images" class="form-label">Upload Images</label>
+        <input type="file" name="question_images" id="question_images" class="form-control" accept="image/*" multiple>
+      </div>
+
+      <div class="mb-4">
+        <label for="question_documents" class="form-label">Upload Documents</label>
+        <input type="file" name="question_documents" id="question_documents" class="form-control"
+          accept=".pdf,.doc,.docx,.pptx" multiple>
+      </div>
+
+      <!-- ✅ Linked Dropdowns -->
+      <hr>
+      <!-- End Add block for bilingual input -->
+
+      <!-- Other Details -->
+      <div class="row g-3">
+        <label class="form-label">Other Details</label>
+
+        <!-- 🔑 Subtopic Shortcode Input -->
+        <!-- 🔑 Subtopic Shortcode Input -->
+        <div class="col-md-12 mb-4">
+          <label for="shortcodeInput" class="form-label">Sub Topic Short Code(s)</label>
+          <input type="text" id="shortcodeInput" name="shortcodeInput" class="form-control"
+                placeholder="Enter shortcode(s), e.g. ECO101, POL202">
+          <div class="form-text">
+            Enter one or more short codes (comma/space separated). Area, Part, Chapter, Topic, and Subtopic will auto-fill.
+          </div>
+        </div>
+
+
+
+        <!-- Area Names -->
+        <div class="col-md-6 mb-4">
+          <label for="areaName" class="form-label">Area Name(s)</label>
+          <select class="form-select" id="areaName" name="area_name[]" multiple="multiple" required>
+            <option value="">Select Area(s)</option>
+            {% if areas and areas|length > 0 %}
+            {% for area in areas %}
+            <option value="{{ area.area_SI_Code }}">{{ area.name }}</option>
+            {% endfor %}
+            {% else %}
+            <option value="" disabled>No Areas Available</option>
+            {% endif %}
+          </select>
+          <div class="form-text">Hold Ctrl (Windows) or Command (Mac) to select multiple areas.</div>
+        </div>
+
+
+        <!-- Part Names -->
+        <!-- Part Names -->
+        <div class="col-md-6 mb-4">
+          <label for="partName" class="form-label">Part Name(s)</label>
+          <select class="form-select" id="partName" name="part_name[]" multiple="multiple" required disabled>
+            <option value="">Select Part(s)</option>
+            {% if parts and parts|length > 0 %}
+            {% for part in parts %}
+            <option value="{{ part.part_serial }}">{{ part.name }}</option>
+            {% endfor %}
+            {% else %}
+            <option value="" disabled>No Parts Available</option>
+            {% endif %}
+          </select>
+          <div class="form-text">Select section(s) first to load related parts.</div>
+        </div>
+
+
+        <!-- Chapter Names -->
+        <!-- Chapter Names -->
+        <div class="col-md-6 mb-4">
+          <label for="chapterName" class="form-label">Chapter Name(s)</label>
+          <select class="form-select" id="chapterName" name="chapter_name[]" multiple="multiple" required disabled>
+            <option value="">Select Chapter(s)</option>
+            {% if chapters and chapters|length > 0 %}
+            {% for chapter in chapters %}
+            <option value="{{ chapter.chapter_number }}">{{ chapter.name }}</option>
+            {% endfor %}
+            {% else %}
+            <option value="" disabled>No Chapters Available</option>
+            {% endif %}
+          </select>
+          <div class="form-text">Select part(s) first to load related chapters.</div>
+        </div>
+
+
+        <!-- Topic Names -->
+        <div class="col-md-6 mb-4">
+          <label for="topicName" class="form-label">Topic Name(s)</label>
+          <select class="form-select" id="topicName" name="topic_name[]" multiple="multiple" required disabled>
+            <option value="">Select Topic(s)</option>
+          </select>
+          <div class="form-text">Select chapter(s) first to load related topics.</div>
+        </div>
+
+        <!-- Subtopic Names -->
+        <div class="col-md-6 mb-4">
+          <label for="subTopicName" class="form-label">Sub Topic Name(s)</label>
+          <select class="form-select" id="subTopicName" name="sub_topic_name[]" multiple="multiple" required disabled>
+            <option value="">Select Subtopic(s)</option>
+          </select>
+          <div class="form-text">Select topic(s) first to load related subtopics.</div>
+        </div>
+
+        <!-- Exam Name Dropdown -->
+        <div class="col-md-6 mb-4">
+          <label for="examName" class="form-label">Exam Name</label>
+          <select class="form-select" id="examName" name="exam_name[]" multiple="multiple" required disabled>
+            <option value="">Select Exam</option>
+          </select>
+          <div class="form-text">Select Sub topic(s) first to load related Exam Name.</div>
+
+          <!-- Display Exam Tags -->
+          <div id="relatedExamsContainer" class="exam-tag-container mt-2"></div>
+        </div>
+
+        <!-- Hashtags Name Input + Auto Tags -->
+        <div class="col-md-6 mb-4">
+          <label for="hashtagsInput" class="form-label">Add Hashtags</label>
+          <input type="text" id="hashtagsInput" name="hashtags" class="form-control"
+                placeholder="#policy, #govt, #reform">
+          <div class="form-text">
+            Separate multiple hashtags with commas. Related hashtags will auto-fill and merge.
+          </div>
+
+          <!-- Auto-Filled Hashtags Tags -->
+          <div id="relatedHashtagsContainer" class="exam-tag-container mt-2"></div>
+        </div>
+
+<div class="mb-4">
+  <label for="aiHashtags" class="form-label">AI Suggested Hashtags</label>
+  <div id="aiHashtagsContainer" class="exam-tag-container"></div>
+  <button type="button" id="generateAIHashtagsBtn" class="btn btn-outline-primary mt-2">
+    Generate AI Hashtags
+  </button>
+  <button type="button" id="saveAIHashtagsBtn" class="btn btn-success mt-2" style="display:none;">
+    Save AI Hashtags
+  </button>
+</div>
+
+
+        <!-- ✅ Correct Current Relevance -->
+        <div class="col-md-6">
+          <div class="form-floating">
+            <select class="form-select" id="currentRelevance" name="current_relevance" required>
+              <option value="">Select Current Relevance</option>
+              <option value="0">0 - Not Relevant</option>
+              <option value="1">1 - Moderately Relevant</option>
+              <option value="2">2 - Very Relevant</option>
+            </select>
+            <label for="currentRelevance" class="form-label">Current Relevance</label>
+          </div>
+        </div>
+
+       <!-- ✅ Current Relevance Topic Explanation (Multiple) -->
+      <div class="col-md-12 mb-4">
+        <label class="form-label">Why Current Relevance ? </label>
+
+        <div id="relevanceTopicsContainer">
+          <div class="input-group mb-2">
+            <textarea class="form-control" name="current_relevance_topic[]" placeholder="Enter relevance topic explanation..."></textarea>
+            <button type="button" class="btn btn-outline-secondary add-topic-btn">+</button>
+          </div>
+        </div>
+
+        <div class="form-text">Add multiple relevance topic explanations if applicable.</div>
+      </div>
+
+
+      </div>
+      <!-- Submit Button -->
+      <div class="col-12 mt-3">
+        <button class="btn btn-primary w-100 py-3" type="submit">Submit Your Input Suggestion</button>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+</div>
+<!-- Simple Type Question Form End -->
+{% endblock content %}
+
+{% block custom_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function () {
+  // --- Init select2
+  $('#language, #areaName, #partName, #chapterName, #topicName, #subTopicName, #examName')
+    .select2({ placeholder: "Select...", allowClear: true });
+
+  disableDropdowns(['#partName', '#chapterName', '#topicName', '#subTopicName', '#examName']);
+
+  // --- SHORTCODE AUTO-FILL ---
+  $('#shortcodeInput').on('blur', async function () {
+    const codes = ($(this).val() || "").split(/[\s,]+/).filter(Boolean);
+    if (!codes.length) return;
+
+    try {
+      const query = codes.map(c => `codes[]=${encodeURIComponent(c)}`).join('&');
+      const res = await fetch(`/question-bank/get-hierarchy-from-shortcode/?${query}`);
+      const payload = await res.json();
+
+      if (payload.status !== 'success') {
+        alert("❌ No hierarchy found for shortcode(s).");
+        resetAllDropdowns();
+        return;
+      }
+      const d = payload.data;
+
+      // --- Fill each level sequentially ---
+      populateAndSelect('#areaName', d.area_ids, d.area_names);
+      await fetchDropdownData('#partName', '/question-bank/get-parts-by-area/', d.area_ids, 'area_ids');
+      populateAndSelect('#partName', d.part_ids, d.part_names);
+
+      await fetchDropdownData('#chapterName', '/question-bank/get-chapters-list/', d.part_ids, 'part_ids');
+      populateAndSelect('#chapterName', d.chapter_ids, d.chapter_names);
+
+      await fetchDropdownData('#topicName', '/question-bank/get-topics-list/', d.chapter_ids, 'chapter_ids');
+      populateAndSelect('#topicName', d.topic_ids, d.topic_names);
+
+      await fetchDropdownData('#subTopicName', '/question-bank/get-subtopics-list/', d.topic_ids, 'topic_ids');
+      populateAndSelect('#subTopicName', d.subtopic_ids, d.subtopic_names);
+
+      // Trigger exam + hashtag fetch
+      $('#subTopicName').trigger('change');
+
+    } catch (err) {
+      console.error("Error fetching shortcode data:", err);
+      resetAllDropdowns();
+    }
+  });
+
+  // --- CASCADE HANDLERS ---
+  $('#areaName').on('change', async function () {
+    const ids = ($(this).val() || []);
+    resetDropdowns(['#partName','#chapterName','#topicName','#subTopicName','#examName']);
+    if (ids.length) {
+      await fetchDropdownData('#partName', '/question-bank/get-parts-by-area/', ids, 'area_ids');
+      enableDropdown('#partName');
+    }
+  });
+
+  $('#partName').on('change', async function () {
+    const ids = ($(this).val() || []);
+    resetDropdowns(['#chapterName','#topicName','#subTopicName','#examName']);
+    if (ids.length) {
+      await fetchDropdownData('#chapterName', '/question-bank/get-chapters-list/', ids, 'part_ids');
+      enableDropdown('#chapterName');
+    }
+  });
+
+  $('#chapterName').on('change', async function () {
+    const ids = ($(this).val() || []);
+    resetDropdowns(['#topicName','#subTopicName','#examName']);
+    if (ids.length) {
+      await fetchDropdownData('#topicName', '/question-bank/get-topics-list/', ids, 'chapter_ids');
+      enableDropdown('#topicName');
+    }
+  });
+
+  $('#topicName').on('change', async function () {
+    const ids = ($(this).val() || []);
+    resetDropdowns(['#subTopicName','#examName']);
+    if (ids.length) {
+      await fetchDropdownData('#subTopicName', '/question-bank/get-subtopics-list/', ids, 'topic_ids');
+      enableDropdown('#subTopicName');
+      $('#subTopicName').trigger('change');
+    }
+  });
+
+  // --- SUBTOPIC → Exams + Hashtags ---
+  $('#subTopicName').on('change', async function () {
+    const ids = ($(this).val() || []);
+    const examDropdown = $('#examName');
+    const examTagContainer = $('#relatedExamsContainer');
+    const hashtagsContainer = $('#relatedHashtagsContainer');
+
+    if (ids.length) {
+      const query = ids.map(id => `subtopic_ids[]=${id}`).join('&');
+
+      // Exams
+      const resExams = await fetch(`/question-bank/get-exams-list/?${query}`);
+      const dataExams = await resExams.json();
+      const relatedIds = new Set(dataExams.related_exams.map(e => e.exam_SI_Number));
+
+      examDropdown.empty().append('<option value="">Select Exam</option>');
+      dataExams.all_exams.forEach(exam => {
+        const opt = $('<option>').val(exam.exam_SI_Number).text(
+          exam.name + (exam.exam_code ? ` (${exam.exam_code})` : '')
+        );
+        if (relatedIds.has(exam.exam_SI_Number)) opt.css('background','#ffeeba').prop('selected',true);
+        examDropdown.append(opt);
+      });
+      enableDropdown('#examName');
+
+      examTagContainer.empty();
+      (dataExams.related_exams.length)
+        ? dataExams.related_exams.forEach(e => examTagContainer.append(
+            $('<div>').addClass('exam-tag').text(e.exam_code ? `${e.name} (${e.exam_code})` : e.name)
+          ))
+        : examTagContainer.append('<div>No exams found.</div>');
+
+      // Hashtags
+      const resHashtags = await fetch(`/question-bank/get-hashtags-list/?${query}`);
+      const dataHashtags = await resHashtags.json();
+      hashtagsContainer.empty();
+      if (dataHashtags.related_hashtags.length) {
+        const autoTags = dataHashtags.related_hashtags.map(ht => `#${ht.name}`);
+        autoTags.forEach(tag => hashtagsContainer.append($('<div>').addClass('exam-tag').text(tag)));
+        const manualInput = $('#hashtagsInput').val().split(',').map(s=>s.trim()).filter(Boolean);
+        const merged = Array.from(new Set([...manualInput, ...autoTags]));
+        $('#hashtagsInput').val(merged.join(', '));
+      } else {
+        hashtagsContainer.append('<div>No hashtags found.</div>');
+      }
+
+    } else {
+      resetDropdown('#examName','Select Exam');
+      examTagContainer.empty(); hashtagsContainer.empty();
+    }
+  });
+
+  // --- HELPERS ---
+  async function fetchDropdownData(selector, url, ids, paramName) {
+    const query = ids.map(id => `${paramName}[]=${encodeURIComponent(id)}`).join('&');
+    const res = await fetch(`${url}?${query}`);
+    const data = await res.json();
+    const key = Object.keys(data)[0];
+    if (data[key]?.length) populateDropdown(selector, data[key]);
+    else resetDropdown(selector,'No data available');
+  }
+
+  function populateDropdown(selector, items) {
+    const dropdown = $(selector);
+    dropdown.empty().append('<option value="">Select...</option>');
+    const idKey = Object.keys(items[0]).find(k =>
+      ['area_SI_Code','part_serial','chapter_number','topic_SI_number','sub_topic_SI_Number','exam_SI_Number'].includes(k)
+    );
+    items.forEach(item => dropdown.append(`<option value="${item[idKey]}">${item.name}</option>`));
+  }
+
+  function populateAndSelect(selector, ids, names) {
+    const dropdown = $(selector); dropdown.empty();
+    ids.forEach((id, idx) => dropdown.append(new Option(names[idx], id, true, true)));
+    enableDropdown(selector);
+  }
+
+  function enableDropdown(sel){ $(sel).prop('disabled',false).trigger('change'); }
+  function disableDropdowns(sels){ sels.forEach(sel => $(sel).prop('disabled',true)); }
+  function resetDropdowns(sels){ sels.forEach(sel => resetDropdown(sel)); }
+  function resetDropdown(sel, ph='Select...'){
+    $(sel).empty().append(`<option value="">${ph}</option>`).prop('disabled',true).trigger('change');
+  }
+  function resetAllDropdowns(){ resetDropdowns(['#partName','#chapterName','#topicName','#subTopicName','#examName']); }
+});
+</script>
+
+<!-- ✅ CKEditor CDN -->
+<script src="https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js"></script>
+
+<script>
+  // ✅ Init CKEditor with full toolbar for both fields
+  CKEDITOR.replace('brief_description', {
+    height: 300,
+    filebrowserUploadUrl: '/ckeditor/upload/',  // Or your own upload endpoint
+    extraPlugins: 'uploadimage,embed,autoembed,image2,justify,colorbutton,font,table,codesnippet',
+    toolbar: [
+      { name: 'document', items: ['Source', '-', 'Preview', 'Print'] },
+      { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', '-', 'Undo', 'Redo'] },
+      { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll'] },
+      '/',
+      { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'] },
+      { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote'] },
+      { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'SpecialChar', 'Embed', 'CodeSnippet'] },
+      '/',
+      { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+      { name: 'colors', items: ['TextColor', 'BGColor'] },
+      { name: 'tools', items: ['Maximize'] }
+    ]
+  });
+
+  CKEDITOR.replace('details', {
+    height: 400,
+    filebrowserUploadUrl: '/ckeditor/upload/',
+    extraPlugins: 'uploadimage,embed,autoembed,image2,justify,colorbutton,font,table,codesnippet',
+    toolbar: [
+      { name: 'document', items: ['Source', '-', 'Preview', 'Print'] },
+      { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', '-', 'Undo', 'Redo'] },
+      { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll'] },
+      '/',
+      { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'] },
+      { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote'] },
+      { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'SpecialChar', 'Embed', 'CodeSnippet'] },
+      '/',
+      { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+      { name: 'colors', items: ['TextColor', 'BGColor'] },
+      { name: 'tools', items: ['Maximize'] }
+    ]
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('questionLinksContainer');
+
+    container.addEventListener('click', function(e) {
+      if (e.target.classList.contains('add-link-btn')) {
+        // Create a new input group
+        const newInputGroup = document.createElement('div');
+        newInputGroup.classList.add('input-group', 'mb-2');
+        newInputGroup.innerHTML = `
+          <input type="url" name="question_link[]" class="form-control" placeholder="https://example.com/resource">
+          <button type="button" class="btn btn-outline-danger remove-link-btn">-</button>
+        `;
+        container.appendChild(newInputGroup);
+      } else if (e.target.classList.contains('remove-link-btn')) {
+        // Remove the input group
+        e.target.parentElement.remove();
+      }
+    });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const topicContainer = document.getElementById('relevanceTopicsContainer');
+
+    topicContainer.addEventListener('click', function (e) {
+      if (e.target.classList.contains('add-topic-btn')) {
+        const newGroup = document.createElement('div');
+        newGroup.classList.add('input-group', 'mb-2');
+        newGroup.innerHTML = `
+          <textarea class="form-control" name="current_relevance_topic[]" placeholder="Enter relevance topic explanation..."></textarea>
+          <button type="button" class="btn btn-outline-danger remove-topic-btn">-</button>
+        `;
+        topicContainer.appendChild(newGroup);
+      } else if (e.target.classList.contains('remove-topic-btn')) {
+        e.target.parentElement.remove();
+      }
+    });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const creditContainer = document.getElementById('creditOrCourtesyContainer');
+
+    creditContainer.addEventListener('click', function(e) {
+      if (e.target.classList.contains('add-credit-btn')) {
+        const newInputGroup = document.createElement('div');
+        newInputGroup.classList.add('input-group', 'mb-2');
+        newInputGroup.innerHTML = `
+          <input type="text" name="credit_or_courtesy[]" class="form-control" placeholder="Enter credit or courtesy">
+          <button type="button" class="btn btn-outline-danger remove-credit-btn">-</button>
+        `;
+        creditContainer.appendChild(newInputGroup);
+      } else if (e.target.classList.contains('remove-credit-btn')) {
+        e.target.parentElement.remove();
+      }
+    });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+  const generateBtn = document.getElementById('generateAIHashtagsBtn');
+  const saveBtn = document.getElementById('saveAIHashtagsBtn');
+  const aiContainer = document.getElementById('aiHashtagsContainer');
+
+  generateBtn.addEventListener('click', async function() {
+    aiContainer.innerHTML = "⏳ Generating hashtags with AI...";
+    
+    const brief = CKEDITOR.instances['brief_description'].getData();
+    const details = CKEDITOR.instances['details'].getData();
+    const resources = Array.from(document.querySelectorAll("input[name='question_link[]']"))
+      .map(i => i.value).filter(Boolean);
+    const existingHashtags = document.getElementById('hashtagsInput').value;
+
+    try {
+      const res = await fetch("/question-bank/generate-ai-hashtags/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+        },
+        body: JSON.stringify({
+          brief_description: brief,
+          details: details,
+          resources: resources,
+          existing_hashtags: existingHashtags
+        })
+      });
+
+      const data = await res.json();
+      if (data.status === "success") {
+        aiContainer.innerHTML = "";
+        data.hashtags.forEach(tag => {
+          const div = document.createElement("div");
+          div.className = "exam-tag";
+          div.textContent = "#" + tag;
+          aiContainer.appendChild(div);
+        });
+        saveBtn.style.display = "inline-block";
+        saveBtn.dataset.hashtags = JSON.stringify(data.hashtags);
+      } else {
+        aiContainer.innerHTML = "❌ Failed: " + data.message;
+      }
+    } catch (err) {
+      aiContainer.innerHTML = "❌ Error while calling AI API";
+    }
+  });
+
+  saveBtn.addEventListener('click', async function() {
+    const hashtags = JSON.parse(saveBtn.dataset.hashtags || "[]");
+    const subtopicIds = $("#subTopicName").val() || [];
+
+    if (!subtopicIds.length) {
+      alert("Please select Subtopics first.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/question-bank/save-ai-hashtags/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+        },
+        body: JSON.stringify({
+          hashtags: hashtags,
+          subtopic_ids: subtopicIds
+        })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        alert("✅ AI hashtags saved successfully!");
+      } else {
+        alert("❌ Failed: " + data.message);
+      }
+    } catch (err) {
+      alert("❌ Error while saving AI hashtags");
+    }
+  });
+});
+
+</script>
+
+{% endblock custom_js %}

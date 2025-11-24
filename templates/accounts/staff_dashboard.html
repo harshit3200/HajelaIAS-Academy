@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Staff Dashboard - Hajela's IAS Academy (HIA){% endblock %}
+
+{% block content %}
+<style>
+    .custom-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: #f8f9fa;
+    }
+    .custom-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .card-img {
+        max-height: 180px;
+        object-fit: contain;
+    }
+    .card-link {
+        display: block;
+        margin-top: 10px;
+        font-weight: 600;
+        color: #007bff;
+        text-decoration: none;
+    }
+    .card-link:hover {
+        text-decoration: underline;
+    }
+    h1 {
+        text-align: center;
+        margin-top: 10px;
+    }
+</style>
+
+<h1>Welcome, {{ user.first_name|default:user.email }}</h1>
+<hr>
+
+<div class="container py-4 text-center">
+    <div class="row g-4">
+
+        <!-- Add Questions -->
+        {% if "add_question" in staff_permissions %}
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/ADD QUESTIONS.png' %}" class="img-fluid card-img" alt="Add Questions">
+                <a href="{% url 'add-simple-type-question' %}" class="card-link">Add Questions</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- View Questions -->
+        {% if "view_question" in staff_permissions %}
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/VIEWS QUESTIONS.png' %}" class="img-fluid card-img" alt="View Questions">
+                <a href="{% url 'view_questions' %}" class="card-link">View Questions</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Upload Excel -->
+        {% if "upload_excel" in staff_permissions %}
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/UPLOAD FILE.png' %}" class="img-fluid card-img" alt="Upload Excel">
+                <a href="{% url 'upload-file' %}" class="card-link">Upload Excel</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- QuestCurator -->
+        {% if "question_curator" in staff_permissions %}
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/QUESTCURATOR.png' %}" class="img-fluid card-img" alt="QuestCurator">
+                <a href="{% url 'question_filter_view' %}" class="card-link">QuestCurator</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Input Suggestions -->
+        {% if "input_suggestion" in staff_permissions %}
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/Add Input Suggestion.png' %}" class="img-fluid card-img" alt="Input Suggestions">
+                <a href="{% url 'input-suggestion-list' %}" class="card-link">Manage Input Suggestions</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Lecture Notes -->
+        {% if "lecture_notes" in staff_permissions %}
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/LECTURE NOTES.png' %}" class="img-fluid card-img" alt="Lecture Notes">
+                <a href="{% url 'list_lecture_notes' %}" class="card-link">Lecture Notes</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Notes AI -->
+        {% if "ai_notes" in staff_permissions %}
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/NOTES AI.png' %}" class="img-fluid card-img" alt="Notes AI">
+                <a href="{% url 'generate_upsc_notes' %}" class="card-link">Notes AI</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Mirror Your Imagination -->
+        {% if "ai_image" in staff_permissions %}
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/Mirror Your Imagination.png' %}" class="img-fluid card-img" alt="Mirror Your Imagination">
+                <a href="{% url 'generate_image' %}" class="card-link">Mirror Your Imagination</a>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

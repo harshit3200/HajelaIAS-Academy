@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Admin Dashboard - Hajela's IAS Academy (HIA){% endblock %}
+
+{% block content %}
+<style>
+        .custom-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background-color: #f8f9fa; /* Light gray background */
+        }
+
+        .custom-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-img {
+            max-height: 180px;
+            object-fit: contain;
+        }
+
+        .card-link {
+            display: block;
+            margin-top: 10px;
+            font-weight: 600;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .card-link:hover {
+            text-decoration: underline;
+        }
+        h1{
+          text-align: center;
+          margin-top: 10px;
+        }
+        h6{
+          text-align: center;
+          margin-top: 10px;
+          color: #ea5323;
+        }
+    </style>
+<h1>Welcome To hajela's IAS </h1>
+<h6>कोचिंग वो, जो पार लगा दे! </h6>
+<hr>
+<!--  Page Content Wrapper Start -->
+                    <div class="dashboard-content-box">
+                        {% comment %} <div class="courses-breadcrumb-top">
+                            <div class="page-breadcrumb-box">
+                                <h2 class="page-breadcrumb-title">LMS Dashboard</h2>
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                                        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                                    </ol>
+                                </nav>
+                            </div>
+                            <div class="dashboard-content-action">
+                                <button type="button" class="btn btn-purple"><span><i
+                                            class="fa-solid fa-cart-shopping"></i></span>Add Order</button>
+                                <button data-bs-toggle="modal" data-bs-target="#createUserModal" type="button"
+                                    class="btn btn-orange"><span><i class="fa-solid fa-plus"></i></span>Add
+                                    User</button>
+                            </div>
+                        </div> {% endcomment %}
+                        <div class="dashboard-card-wrapper">
+                            <div class="row mb-4">
+                                <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+                                    <div class="dashboard-single-card dsc-purple">
+                                        <div class="dsc-top">
+                                            <div class="dsc-top-icon">
+                                                <img src="{% static 'assets/images/icons/user.svg '%}" alt="user">
+                                            </div>
+                                            <div class="dsc-top-content">
+                                                <p>Total Students</p>
+                                                <h3>10580 </h3>
+                                            </div>
+                                        </div>
+                                        <div class="dsc-bottom">
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar" style="width: 44%"></div>
+                                            </div>
+                                            <p><img src="{% static 'assets/images/icons/curve-arrow-green.svg '%}"
+                                                    alt="curve-arrow"><span>2.6%</span> than last week</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+                                    <div class="dashboard-single-card dsc-orange">
+                                        <div class="dsc-top">
+                                            <div class="dsc-top-icon">
+                                                <img src="{% static 'assets/images/icons/user-orange.svg'%}" alt="user">
+                                            </div>
+                                            <div class="dsc-top-content">
+                                                <p>Total Faculty</p>
+                                                <h3>350</h3>
+                                            </div>
+                                        </div>
+                                        <div class="dsc-bottom">
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar" style="width: 44%"></div>
+                                            </div>
+                                            <p><img src="{% static 'assets/images/icons/curve-arrow-orange.svg'%}"
+                                                    alt="curve-arrow"><span>2.6%</span> than last week</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+                                    <div class="dashboard-single-card dsc-purple">
+                                        <div class="dsc-top">
+                                            <div class="dsc-top-icon">
+                                                <img src="{% static 'assets/images/icons/courses.svg'%}" alt="courses">
+                                            </div>
+                                            <div class="dsc-top-content">
+                                                <p>Total Courses</p>
+                                                <h3>455</h3>
+                                            </div>
+                                        </div>
+                                        <div class="dsc-bottom">
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar" style="width: 44%"></div>
+                                            </div>
+                                            <p><img src="{% static 'assets/images/icons/curve-arrow-green.svg'%}"
+                                                    alt="curve-arrow"><span>2.6%</span> than last week</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+                                    <div class="dashboard-single-card dsc-orange">
+                                        <div class="dsc-top">
+                                            <div class="dsc-top-icon">
+                                                <img src="{% static 'assets/images/icons/book.svg'%}" alt="book">
+                                            </div>
+                                            <div class="dsc-top-content">
+                                                <p>Total Book Store</p>
+                                                <h3>95</h3>
+                                            </div>
+                                        </div>
+                                        <div class="dsc-bottom">
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar" style="width: 44%"></div>
+                                            </div>
+                                            <p><img src="{% static 'assets/images/icons/curve-arrow-orange.svg'%}"
+                                                    alt="curve-arrow"><span>2.6%</span> than last week</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+        <!-- Total Questions -->
+        <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+            <div class="dashboard-single-card dsc-purple">
+                <div class="dsc-top">
+                    <div class="dsc-top-icon">
+                        <img src="{% static 'assets/images/icons/user.svg' %}" alt="user">
+                    </div>
+                    <div class="dsc-top-content">
+                        <p>Total Questions Store</p>
+                        <h3>{{ total_questions }}</h3> <!-- Dynamic value -->
+                    </div>
+                </div>
+                <div class="dsc-bottom">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{ progress_percentage }}%"></div>
+                    </div>
+                    <p><img src="{% static 'assets/images/icons/curve-arrow-green.svg' %}" alt="curve-arrow"><span>{{ progress_percentage|floatformat:2 }}%</span> than last week</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total PYQs -->
+        <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+            <div class="dashboard-single-card dsc-orange">
+                <div class="dsc-top">
+                    <div class="dsc-top-icon">
+                        <img src="{% static 'assets/images/icons/user-orange.svg' %}" alt="user">
+                    </div>
+                    <div class="dsc-top-content">
+                        <p>Total PYQ's</p>
+                        <h3>{{ total_pyqs }}</h3> <!-- Dynamic value -->
+                    </div>
+                </div>
+                <div class="dsc-bottom">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 44%"></div>
+                    </div>
+                    <p><img src="{% static 'assets/images/icons/curve-arrow-orange.svg' %}" alt="curve-arrow"><span>2.6%</span> than last week</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total MOQ -->
+        <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+            <div class="dashboard-single-card dsc-purple">
+                <div class="dsc-top">
+                    <div class="dsc-top-icon">
+                        <img src="{% static 'assets/images/icons/courses.svg' %}" alt="courses">
+                    </div>
+                    <div class="dsc-top-content">
+                        <p>Total MOQ's</p>
+                        <h3>{{ total_moqs }}</h3> <!-- Dynamic value -->
+                    </div>
+                </div>
+                <div class="dsc-bottom">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 44%"></div>
+                    </div>
+                    <p><img src="{% static 'assets/images/icons/curve-arrow-green.svg' %}" alt="curve-arrow"><span>2.6%</span> than last week</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total OSQ -->
+        <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+            <div class="dashboard-single-card dsc-orange">
+                <div class="dsc-top">
+                    <div class="dsc-top-icon">
+                        <img src="{% static 'assets/images/icons/book.svg' %}" alt="book">
+                    </div>
+                    <div class="dsc-top-content">
+                        <p>Total OSQ's</p>
+                        <h3>{{ total_osqs }}</h3> <!-- Dynamic value -->
+                    </div>
+                </div>
+                <div class="dsc-bottom">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 44%"></div>
+                    </div>
+                    <p><img src="{% static 'assets/images/icons/curve-arrow-orange.svg' %}" alt="curve-arrow"><span>2.6%</span> than last week</p>
+                </div>
+            </div>
+        </div>
+    </div>
+                            <div class="row mb-4">
+    <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+        <div class="dashboard-single-card dsc-purple">
+            <div class="dsc-top">
+                <div class="dsc-top-icon">
+                    <img src="{% static 'assets/images/icons/user.svg' %}" alt="user">
+                </div>
+                <div class="dsc-top-content">
+                    <p>Total Input Suggestions</p>
+                    <h3>{{ total_suggestions }}</h3>
+                </div>
+            </div>
+            <div class="dsc-bottom">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 44%"></div>
+                </div>
+                <p><img src="{% static 'assets/images/icons/curve-arrow-green.svg' %}" alt="curve-arrow"><span>+2.6%</span> than last week</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+        <div class="dashboard-single-card dsc-orange">
+            <div class="dsc-top">
+                <div class="dsc-top-icon">
+                    <img src="{% static 'assets/images/icons/user-orange.svg' %}" alt="user">
+                </div>
+                <div class="dsc-top-content">
+                    <p>Total Approved Input Suggestions</p>
+                    <h3>{{ total_approved }}</h3>
+                </div>
+            </div>
+            <div class="dsc-bottom">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ progress_approved }}%"></div>
+                </div>
+                <p><img src="{% static 'assets/images/icons/curve-arrow-orange.svg' %}" alt="curve-arrow"><span>{{ progress_approved }}%</span> of total</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+        <div class="dashboard-single-card dsc-purple">
+            <div class="dsc-top">
+                <div class="dsc-top-icon">
+                    <img src="{% static 'assets/images/icons/courses.svg' %}" alt="courses">
+                </div>
+                <div class="dsc-top-content">
+                    <p>Total Pending Input Suggestions</p>
+                    <h3>{{ total_pending }}</h3>
+                </div>
+            </div>
+            <div class="dsc-bottom">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ progress_pending }}%"></div>
+                </div>
+                <p><img src="{% static 'assets/images/icons/curve-arrow-green.svg' %}" alt="curve-arrow"><span>{{ progress_pending }}%</span> of total</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3 mb-4 mb-xl-0">
+        <div class="dashboard-single-card dsc-orange">
+            <div class="dsc-top">
+                <div class="dsc-top-icon">
+                    <img src="{% static 'assets/images/icons/book.svg' %}" alt="book">
+                </div>
+                <div class="dsc-top-content">
+                    <p>Total Input Suggestions This Month</p>
+                    <h3>{{ total_this_month }}</h3>
+                </div>
+            </div>
+            <div class="dsc-bottom">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ progress_month }}%"></div>
+                </div>
+                <p><img src="{% static 'assets/images/icons/curve-arrow-orange.svg' %}" alt="curve-arrow"><span>{{ progress_month }}%</span> of total</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                    <!--  Page Content Wrapper End -->
+<div class="container py-4 text-center">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/ADD QUESTIONS.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'add-simple-type-question' %}" class="card-link">Add Questions</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/VIEWS QUESTIONS.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'view_questions' %}" class="card-link">View Questions</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/QUESTCURATOR.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'question_filter_view' %}" class="card-link">QUESTCURATOR</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/Add Input Suggestion.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'add-input-suggestion' %}" class="card-link">Add Input Suggestion</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/Check Your Input Suggestion.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'input-suggestion-list' %}" class="card-link">Check Your Input Suggestion</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/Mirror Your Imagination.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'generate_image' %}" class="card-link">Mirror Your Imagination</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/Add Input Suggestion.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'upload-file' %}" class="card-link">Upload Excel File</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/Check Your Input Suggestion.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'generate_test_form' %}" class="card-link">Test Paper Generate Document</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/Mirror Your Imagination.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'upload_lecture_note' %}" class="card-link">Upload Lecture Notes</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/Mirror Your Imagination.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'list_lecture_notes' %}" class="card-link">List Lecture Notes</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/Mirror Your Imagination.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'generate_upsc_notes' %}" class="card-link">Notes AI</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 shadow custom-card rounded">
+                <img src="{% static 'assets/images/Mirror Your Imagination.png'%}" class="img-fluid card-img" alt="...">
+                <a href="{% url 'hierarchy' %}" class="card-link">hierarchy</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+  <div class="p-3 shadow custom-card rounded">
+    <img src="{% static 'assets/images/PENDING APPROVAL.png' %}" class="img-fluid card-img" alt="Pending Approvals">
+    <a href="{% url 'pending_users' %}" class="card-link">Pending Approvals</a>
+
+  </div>
+</div>
+
+    </div>
+</div>
+
+{% endblock %}
+

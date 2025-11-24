@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% block title %}{{ question.brief_description|truncatewords:5 }} - Hajela's IAS Academy (HIA){% endblock %}
+
+{% block content %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f8fa;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        /* Sidebar */
+         
+
+        .chat-container {
+            flex: 1;
+            padding: 20px;
+            background: white;
+            height: 100vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .chat-message {
+            display: flex;
+            margin-bottom: 25px;
+        }
+
+        .chat-message.user {
+            justify-content: flex-end;
+        }
+
+        .chat-message.ai {
+            justify-content: flex-start;
+        }
+
+        .bubble {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 16px;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .bubble.user {
+            background-color: #007bff;
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+
+        .bubble.ai {
+            background-color: #e5e5ea;
+            color: black;
+            border-bottom-left-radius: 0;
+        }
+
+        .image-response img {
+            max-width: 350px;
+            max-height: 350px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background-color: white;
+            position: sticky;
+            bottom: 0;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button[disabled] {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Spinner overlay */
+        #spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Toggle sidebar */
+        #toggle-sidebar {
+            position: fixed;
+            left: 10px;
+            top: 10px;
+            z-index: 10000;
+            background-color: #343a40;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .sidebar.hide {
+            transform: translateX(-100%);
+        }
+
+        .download-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 12px;
+            background-color: #28a745;
+            color: white;
+            font-size: 14px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .chat-controls {
+            text-align: center;
+            margin: 20px;
+        }
+
+        .chat-controls a {
+            display: inline-block;
+            margin: 5px 10px;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .chat-controls .new-chat {
+            background-color: #17a2b8;
+        }
+
+        .chat-controls .clear-chat {
+            background-color: #dc3545;
+        }
+
+    </style>
+
+
+<!-- Sidebar Toggle -->
+{% comment %} <button id="toggle-sidebar">☰</button> {% endcomment %}
+
+<div class="container">
+    <!-- Sidebar -->
+
+
+    <!-- Chat Container -->
+    <div class="chat-container">
+        {% if chat_history %}
+            {% for chat in chat_history %}
+                <div class="chat-message user">
+                    <div class="bubble user">{{ chat.prompt }}</div>
+                </div>
+                <div class="chat-message ai">
+                    <div class="bubble ai image-response">
+                        <img src="{{ chat.image_url }}" alt="Image">
+                        <br>
+                        <a href="{{ chat.image_url }}" class="download-btn" download>⬇ Download</a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align:center;">Start chatting to generate images!</p>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="post" onsubmit="return showLoading();">
+            {% csrf_token %}
+            <input type="text" name="prompt" placeholder="Describe your image or modification..." required>
+            <button type="submit" id="generate-btn">Send</button>
+        </form>
+
+        <!-- Chat Control Buttons -->
+        <div class="chat-controls">
+            <a href="{% url 'new_image_chat' %}" class="new-chat">➕ Start New Chat</a>
+            <a href="{% url 'clear_image_chat' %}" class="clear-chat">🗑️ Clear Chat History</a>
+        </div>
+    </div>
+</div>
+
+<!-- Spinner overlay -->
+<div id="spinner-overlay">
+    <div class="spinner"></div>
+</div>
+
+<script>
+    function showLoading() {
+        document.getElementById('spinner-overlay').style.display = 'flex';
+        document.getElementById('generate-btn').disabled = true;
+        return true;
+    }
+
+    // Sidebar toggle
+    document.getElementById('toggle-sidebar').onclick = function () {
+        document.getElementById('sidebar').classList.toggle('hide');
+    };
+</script>
+
+{% endblock %}

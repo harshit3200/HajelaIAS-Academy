@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lecture Notes - Hajela's IAS Academy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="text-center mb-4">Lecture Notes Library</h2>
+
+  <div class="row">
+    {% for note in notes %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ note.chapter.name }}</h5>
+          <p class="card-text mb-3">
+            <strong>Area:</strong> {{ note.area.name }}<br>
+            <strong>Part:</strong> {{ note.part.name }}<br>
+            <strong>Chapter:</strong> {{ note.chapter.name }}<br>
+            <strong>Topic:</strong> {{ note.topic.name }}<br>
+            <strong>CTPL:</strong> {{ note.get_ctpl_display }}<br>
+
+            <strong>Language:</strong> {{ note.get_language_display }}<br>
+            <strong>Type:</strong> {{ note.note_type|upper }}<br>
+            <strong>Uploaded:</strong> {{ note.created_at|date:"M d, Y" }}<br>
+            <strong>Created By:</strong> {{ note.created_by }}
+          </p>
+          <div class="mt-auto">
+            <a href="{% url 'view_lecture_note_detail' note.id %}" class="btn btn-primary w-100 mb-2">
+              📖 View Flipbook
+            </a>
+            <a href="{{ note.note_file.url }}" download class="btn btn-outline-secondary w-100">
+              ⬇️ Download File
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-muted text-center">No notes uploaded yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

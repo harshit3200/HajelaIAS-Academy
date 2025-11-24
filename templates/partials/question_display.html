@@ -1,0 +1,109 @@
+{% if q %}
+    {% if lang == 'en' %}
+        {% if q.question_sub_type in 'simple_type true_and_false_type fill_in_the_blank_type' %}
+            <p>{{ q.question_part_first }}</p>
+        {% elif q.question_sub_type == 'r_and_a_type' %}
+            <p>{{ q.question_part_first }}</p>
+            <p><strong>Assertion:</strong> {{ q.assertion }}</p>
+            <p><strong>Reason:</strong> {{ q.reason }}</p>
+        {% elif q.question_sub_type == 'list_type_1' %}
+            <p>{{ q.question_part_first }}</p>
+            <ol>{% for item in q.list_1_items %}<li>{{ item }}</li>{% endfor %}</ol>
+            <p>{{ q.question_part_third }}</p>
+        {% elif q.question_sub_type == 'list_type_2' %}
+            <p>{{ q.question_part_first }}</p>
+            <table class="table"><tr>
+                <td><ol>{% for item in q.list_1_items %}<li>{{ item }}</li>{% endfor %}</ol></td>
+                <td><ol>{% for item in q.list_2_items %}<li>{{ item }}</li>{% endfor %}</ol></td>
+            </tr></table>
+        {% endif %}
+        <p>(a) {{ q.answer_option_a }}</p>
+        <p>(b) {{ q.answer_option_b }}</p>
+        <p>(c) {{ q.answer_option_c }}</p>
+        <p>(d) {{ q.answer_option_d }}</p>
+        <p><strong>Answer:</strong> {{ q.correct_answer_choice }}</p>
+        <p><strong>Solution:</strong> {{ q.correct_answer_description }}</p>
+    {% else %}
+        <!-- Hindi question display logic similar to above -->
+        <p>{{ q.question_part_first_hi }}</p>
+        <p>(a) {{ q.answer_option_a_hi }}</p>
+        <p>(b) {{ q.answer_option_b_hi }}</p>
+        <p>(c) {{ q.answer_option_c_hi }}</p>
+        <p>(d) {{ q.answer_option_d_hi }}</p>
+        <p><strong>Answer:</strong> {{ q.correct_answer_choice }}</p>
+        <p><strong>Solution:</strong> {{ q.correct_answer_description_hi }}</p>
+    {% endif %}
+{% else %}
+    <p class="text-danger">Not available</p>
+{% endif %}
+
+{% comment %} 
+{% else %}
+ <hr>
+<!-- Button -->
+<button id="showTaggedBtn_{{ q.id }}" 
+        class="btn btn-outline-primary btn-sm mt-2" 
+        data-question-id="{{ q.id }}">
+    Show Tagged Subtopics & Keywords
+</button>
+
+<!-- Display Box -->
+<div id="taggedDataBox_{{ q.id }}" class="mt-3" style="display: none;">
+    <h6><b>Manual Subtopics:</b></h6>
+    <ul id="manualSubtopicsList_{{ q.id }}"></ul>
+
+    <h6><b>AI Subtopics:</b></h6>
+    <ul id="aiSubtopicsList_{{ q.id }}"></ul>
+
+    <h6><b>Keywords (English):</b></h6>
+    <ul id="keywordsEnList_{{ q.id }}"></ul>
+
+    <h6><b>Keywords (Hindi):</b></h6>
+    <ul id="keywordsHiList_{{ q.id }}"></ul>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const button = document.getElementById("showTaggedBtn_{{ q.id }}");
+    if (button) {
+        button.addEventListener("click", function () {
+            const questionId = this.dataset.questionId;
+            fetch(`/question-bank/fetch-tagged-subtopics/${questionId}/`)
+                .then(res => res.json())
+                .then(data => {
+                    const box = document.getElementById(`taggedDataBox_${questionId}`);
+                    box.style.display = "block";
+
+                    // Manual Subtopics
+                    document.getElementById(`manualSubtopicsList_${questionId}`).innerHTML =
+                        data.manual_subtopics.length
+                            ? data.manual_subtopics.map(st => `<li>${st}</li>`).join('')
+                            : "<li>None</li>";
+
+                    // AI Subtopics
+                    document.getElementById(`aiSubtopicsList_${questionId}`).innerHTML =
+                        data.ai_subtopics.length
+                            ? data.ai_subtopics.map(st => `<li>${st}</li>`).join('')
+                            : "<li>None</li>";
+
+                    // Keywords EN
+                    document.getElementById(`keywordsEnList_${questionId}`).innerHTML =
+                        data.keywords_en.length
+                            ? data.keywords_en.map(k => `<li>${k}</li>`).join('')
+                            : "<li>None</li>";
+
+                    // Keywords HI
+                    document.getElementById(`keywordsHiList_${questionId}`).innerHTML =
+                        data.keywords_hi.length
+                            ? data.keywords_hi.map(k => `<li>${k}</li>`).join('')
+                            : "<li>None</li>";
+                })
+                .catch(err => {
+                    alert("Error fetching tagged subtopics: " + err);
+                });
+        });
+    }
+});
+</script>
+
+{% else %} {% endcomment %}

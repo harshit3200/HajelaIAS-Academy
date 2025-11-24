@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Hajela's IAS</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+</head>
+<body class="user-body">
+<div id="user-register" class="user-access section">
+  <div class="user-access-area">
+    <div class="container">
+      <div class="row justify-content-center align-items-center center-form">
+        <div class="col-lg-6 col-md-8">
+          <form method="post" class="user-profile-form shadow p-4 bg-white rounded">
+            {% csrf_token %}
+
+            <div class="form-top-box text-center mb-4">
+              <h2 class="form-name">Create an Account</h2>
+              <p class="form-text text-muted">Join Hajela's IAS Academy today!</p>
+            </div>
+
+            <!-- User Type -->
+            <div class="mb-3">
+              <label for="user_type" class="form-label">Register as</label>
+              <select class="form-select" id="user_type" name="user_type" required>
+                <option value="student">Student</option>
+                <option value="staff">Staff</option>
+              </select>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="email" class="form-label">Email Address</label>
+              <input type="email" name="email" id="email" class="form-control" placeholder="example@gmail.com" required>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" name="password" id="password" class="form-control" placeholder="********" required>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+              <label for="confirm_password" class="form-label">Confirm Password</label>
+              <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="********" required>
+            </div>
+
+            <!-- Django Messages -->
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mt-3">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+
+            <!-- Submit -->
+            <div class="d-grid gap-2 mt-4">
+              <button type="submit" class="btn btn-success">Register</button>
+            </div>
+
+            <p class="text-center mt-3">Already registered?
+              <a href="{% url 'login' %}" class="text-decoration-none">Login here</a>
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

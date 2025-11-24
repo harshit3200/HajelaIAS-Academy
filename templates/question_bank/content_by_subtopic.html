@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% load custom_tags %}
+{% block title %}Content by SubTopic{% endblock %}
+
+{% block content %}
+<style>
+  .card:hover {
+  transform: translateY(-5px);
+  transition: 0.3s ease-in-out;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 5px 10px;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  color: #222;
+}
+
+.card-body p {
+  font-size: 0.9rem;
+  color: #444;
+}
+
+</style>
+<div class="container py-4">
+    <h2>Content Filtered by SubTopic</h2>
+
+    <!-- Filter form -->
+    <form method="get" class="mb-4">
+        <input type="text" name="sub_topic_short_Code" placeholder="Enter SubTopic Short Code"
+               value="{{ sub_topic_short_code }}" class="form-control d-inline w-auto" />
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+    {% if sub_topic_short_code %}
+      <h5>Results for: <b>{{ sub_topic_short_code }}</b></h5>
+    {% endif %}
+
+<!-- ✅ PYQs -->
+<div class="card mb-3">
+  <div class="card-header bg-primary text-white">Previous Year Questions</div>
+  <div class="card-body">
+    {% if pyqs_grouped %}
+      <div class="row">
+        {% for base_id, pair in pyqs_grouped %}
+          {% include "question_bank/question_pair_card.html" with pair=pair %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No Previous Year Questions found.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ✅ MOQs -->
+<div class="card mb-3">
+  <div class="card-header bg-success text-white">Model Questions</div>
+  <div class="card-body">
+    {% if moqs_grouped %}
+      <div class="row">
+        {% for base_id, pair in moqs_grouped %}
+          {% include "question_bank/question_pair_card.html" with pair=pair %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No Model Questions found.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ✅ OSQs -->
+<div class="card mb-3">
+  <div class="card-header bg-warning text-dark">Other Source Questions</div>
+  <div class="card-body">
+    {% if osqs_grouped %}
+      <div class="row">
+        {% for base_id, pair in osqs_grouped %}
+          {% include "question_bank/question_pair_card.html" with pair=pair %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No Other Source Questions found.</p>
+    {% endif %}
+  </div>
+</div>
+
+  
+    <!-- Lecture Notes -->
+<div class="card mb-3">
+  <div class="card-header bg-primary text-white">Lecture Notes</div>
+  <div class="card-body">
+    {% if lecture_notes %}
+      <div class="row">
+        {% for note in lecture_notes %}
+          <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <!-- Description -->
+                <h5 class="card-title">{{ note.description|default:"No description" }}</h5>
+                
+                <!-- File Link -->
+                {% if note.note_file %}
+                  <p><a href="{{ note.note_file.url }}" target="_blank" class="btn btn-sm btn-outline-light">📂 Open File</a></p>
+                {% endif %}
+
+                <!-- Metadata -->
+                <p><strong>Language:</strong> {{ note.get_language_display }}</p>
+                <p><strong>CTPL:</strong> {{ note.get_ctpl_display }}</p>
+                <p><strong>Type:</strong> {{ note.get_note_type_display }}</p>
+
+                <!-- Hierarchy -->
+                <p><strong>Area:</strong> {{ note.area.name }}</p>
+                <p><strong>Part:</strong> {{ note.part.name }}</p>
+                <p><strong>Chapter:</strong> {{ note.chapter.name }}</p>
+                {% if note.topic %}
+                  <p><strong>Topic:</strong> {{ note.topic.name }}</p>
+                {% endif %}
+                {% if note.subtopic %}
+                  <p><strong>Subtopic:</strong> {{ note.subtopic.name }}</p>
+                {% endif %}
+
+              </div>
+              <div class="card-footer text-muted">
+                <small>
+                  Added on {{ note.created_at|date:"Y-m-d H:i" }}
+                  {% if note.created_by %} by {{ note.created_by }}{% endif %}
+                </small>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No Lecture Notes found.</p>
+    {% endif %}
+  </div>
+</div>
+
+
+<!-- ✅ Modern Input Suggestions Grid -->
+<div class="card mb-3">
+  <div class="card-header bg-secondary text-white">Input Suggestions</div>
+  <div class="card-body">
+    {% if input_suggestions %}
+      <div class="row">
+        {% for inp in input_suggestions %}
+          <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0" style="border-radius: 10px; overflow: hidden;">
+              
+              <!-- 🔹 Image or Video Preview -->
+              {% if inp.images.all %}
+                <img src="{{ inp.images.first.image.url }}" class="card-img-top" alt="Input Suggestion Image" style="height:230px; object-fit:cover;">
+              {% elif inp.question_video %}
+                <video width="100%" height="230" controls style="object-fit:cover;">
+                  <source src="{{ inp.question_video.url }}" type="video/mp4">
+                </video>
+              {% else %}
+                <img src="{% static 'assets/images/no-image.jpg' %}" class="card-img-top" alt="No Image" style="height:230px; object-fit:cover;">
+              {% endif %}
+              
+              <div class="card-body" style="overflow-y:auto; max-height:300px;">
+                
+                <!-- 🔹 Title -->
+                <h5 class="card-title fw-bold">
+                  {{ inp.brief_description|striptags|truncatewords:10 }}
+                </h5>
+
+                <!-- 🔹 Approval Status Badge -->
+                <p>
+                  <strong>Approval Status:</strong>
+                  {% if inp.approval_status == 'approved' %}
+                    <span class="badge bg-success">{{ inp.get_approval_status_display }}</span>
+                  {% elif inp.approval_status == 'approved_with_modification' %}
+                    <span class="badge bg-info text-dark">{{ inp.get_approval_status_display }}</span>
+                  {% elif inp.approval_status == 'pending_faculty' or inp.approval_status == 'pending_director' %}
+                    <span class="badge bg-warning text-dark">{{ inp.get_approval_status_display }}</span>
+                  {% elif inp.approval_status == 'rejected' %}
+                    <span class="badge bg-danger">{{ inp.get_approval_status_display }}</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ inp.get_approval_status_display }}</span>
+                  {% endif %}
+                </p>
+
+                <!-- 🔹 Relevance Info -->
+                {% if inp.current_relevance %}
+                  <p><strong>Current Relevance:</strong> {{ inp.current_relevance }}</p>
+                {% endif %}
+                {% if inp.current_relevance_topic %}
+                  <p><strong>Relevance Topic:</strong> {{ inp.current_relevance_topic }}</p>
+                {% endif %}
+
+                <!-- 🔹 Area Info -->
+                {% if inp.area_name.exists %}
+                  <p><strong>Area:</strong>
+                    {% for area in inp.area_name.all %}
+                      {{ area.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                  </p>
+                {% endif %}
+
+                <!-- 🔹 “Read More” Button -->
+                <a href="{% url 'view-input-suggestion' inp.pk %}" 
+                   class="btn btn-primary btn-sm mt-2">
+                   Read More
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No Input Suggestions found.</p>
+    {% endif %}
+  </div>
+</div>
+
+</div>
+
+
+
+</div>
+{% endblock %}

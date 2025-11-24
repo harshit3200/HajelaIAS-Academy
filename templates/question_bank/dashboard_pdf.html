@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Report</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard Report</h1>
+    <h3>Report Generation Date: {{ report_date }}</h3>
+
+    <h2>This Week</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Sr. No.</th>
+                <th>User Email</th>
+                <th>No. of Questions Uploaded</th>
+                <th>No. of Idioms/Phrases Uploaded</th>
+                <th>No. of Input Suggestions Uploaded</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user_data in this_week_questions %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ user_data.created_by__email }}</td>
+                <td>{{ user_data.total_questions }}</td>
+                <td>{% for idiom_data in this_week_idioms %}{% if idiom_data.created_by__email == user_data.created_by__email %}{{ idiom_data.total_idioms }}{% endif %}{% endfor %}</td>
+                <td>{% for suggestion_data in this_week_input_suggestions %}{% if suggestion_data.created_by__email == user_data.created_by__email %}{{ suggestion_data.total_suggestions }}{% endif %}{% endfor %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

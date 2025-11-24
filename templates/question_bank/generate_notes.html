@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Generate UPSC Notes{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Generate UPSC Notes</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="topic" class="form-label">Enter UPSC Topic</label>
+            <input type="text" name="topic" id="topic" class="form-control" placeholder="e.g. India’s Nuclear Doctrine" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Generate Notes</button>
+    </form>
+</div>
+{% endblock %}

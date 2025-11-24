@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center text-success">📘 AI-Generated Questions</h2>
+
+    {% if questions %}
+        <div class="row">
+            {% for question in questions %}
+                <div class="col-md-12">
+                    <div class="card mb-4 shadow-sm border-0 rounded-3">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary fw-bold">Question {{ forloop.counter }}</h5>
+
+                            {% if question.question_part %}
+                                <p class="card-text"><strong>Q:</strong> {{ question.question_part }}</p>
+                            {% endif %}
+
+                            {% if question.answer_option_a or question.answer_option_b or question.answer_option_c or question.answer_option_d %}
+                                <ul class="list-unstyled ps-3">
+                                    {% if question.answer_option_a %}
+                                        <li><strong>(a)</strong> {{ question.answer_option_a }}</li>
+                                    {% endif %}
+                                    {% if question.answer_option_b %}
+                                        <li><strong>(b)</strong> {{ question.answer_option_b }}</li>
+                                    {% endif %}
+                                    {% if question.answer_option_c %}
+                                        <li><strong>(c)</strong> {{ question.answer_option_c }}</li>
+                                    {% endif %}
+                                    {% if question.answer_option_d %}
+                                        <li><strong>(d)</strong> {{ question.answer_option_d }}</li>
+                                    {% endif %}
+                                </ul>
+                            {% endif %}
+
+                            {% if question.correct_answer_choice %}
+                                <p class="mt-2 text-success"><strong>✅ Correct Answer:</strong> ({{ question.correct_answer_choice|upper }})</p>
+                            {% endif %}
+
+                            {% if question.correct_answer_description %}
+                            <p><strong>📘 Explanation:</strong> {{ question.correct_answer_description }}</p>
+                            {% endif %}
+
+                            <p class="text-muted mb-0">
+                                🧠 <strong>Type:</strong> {{ question.question_sub_type|title }} |
+                                🕒 <strong>Created:</strong> {{ question.created_at|date:"d M Y, h:i A" }}
+                                <strong>Created By:</strong> {{ question.created_by }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-danger">No AI-generated questions found.</p>
+    {% endif %}
+</div>
+{% endblock %}

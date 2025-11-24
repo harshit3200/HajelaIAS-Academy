@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+{% block title %}SubTopic Keyword Generator{% endblock %}
+{% block content %}
+
+<style>
+    .card { background:#fff; border-radius:12px; box-shadow:0 3px 6px rgba(0,0,0,0.1); margin-top:25px; padding:20px; }
+    .btn-mode { border:none; border-radius:6px; padding:6px 12px; font-weight:500; color:#fff; }
+    .btn-conceptual { background:linear-gradient(to right,#003f89,#1e90ff); }
+    .btn-pyq { background:linear-gradient(to right,#1e7b3f,#28a745); }
+    .keywords-box { background:#f8f9fa; border-radius:8px; padding:10px; min-height:60px; }
+    .col-keywords { width:48%; display:inline-block; vertical-align:top; }
+    .keyword-chip { display:inline-block; border-radius:20px; padding:4px 10px; font-size:0.9rem; margin:3px; font-weight:500; }
+    .keyword-chip.eng { background-color:#e9efff; color:#003f89; }
+    .keyword-chip.hi { background-color:#fff2e0; color:#a85100; }
+    .keyword-chip.pyq { background-color:#e5f7ea; color:#1e7b3f; }
+    .subtitle { font-size:0.9rem; font-weight:600; margin-bottom:6px; }
+</style>
+
+<div class="container mt-4">
+    <h3 class="mb-4 text-primary fw-bold"><i class="fa-solid fa-robot"></i> SubTopic Keyword Generator</h3>
+
+    <div class="card">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th width="8%">SI No.</th>
+                    <th width="22%">SubTopic</th>
+                    <th width="20%">Short Code</th>
+                    <th width="20%">Topic</th>
+                    <th width="30%">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in subtopics %}
+                <tr id="row-{{ sub.sub_topic_SI_Number }}">
+                    <td>{{ sub.sub_topic_SI_Number }}</td>
+                    <td>{{ sub.name }}</td>
+                    <td>{{ sub.sub_topic_short_Code }}</td>
+                    <td>{{ sub.topic.name }}</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            <button class="btn-mode btn-conceptual" data-id="{{ sub.sub_topic_SI_Number }}" data-mode="conceptual">🧠 Sub Topic Based</button>
+                            <button class="btn-mode btn-pyq" data-id="{{ sub.sub_topic_SI_Number }}" data-mode="pyq">📘 PYQ Generic</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <div class="d-flex justify-content-between">
+                            <div class="col-keywords">
+                                <div class="subtitle text-primary">🧠 Sub Topic Based Keywords</div>
+                                <div id="keywords-conceptual-{{ sub.sub_topic_SI_Number }}" class="keywords-box">
+                                    <em class="text-muted">No Sub Topic Based keywords yet.</em>
+                                </div>
+                            </div>
+                            <div class="col-keywords">
+                                <div class="subtitle text-success">📘 PYQ Generic Keywords</div>
+                                <div id="keywords-pyq-{{ sub.sub_topic_SI_Number }}" class="keywords-box">
+                                    <em class="text-muted">No PYQ Generic keywords yet.</em>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.btn-mode').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const id = this.dataset.id;
+        const mode = this.dataset.mode;
+        const box = document.getElementById(`keywords-${mode}-${id}`);
+        const origText = this.innerHTML;
+
+        this.disabled = true;
+        this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+        const baseUrl = "{% url 'generate_keywords' 'DUMMY_ID' %}".replace('DUMMY_ID', id);
+        const finalUrl = `${baseUrl}?mode=${mode}`;
+
+        try {
+            const response = await fetch(finalUrl, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                // 🧠 If conceptual mode, detect bilingual blocks
+                if (mode === "conceptual") {
+                    const content = data.keywords;
+                    const engMatch = content.match(/English Keywords[:：]?(.*?)(Hindi|हिंदी|$)/is);
+                    const hiMatch = content.match(/Hindi Keywords[:：]?(.*)$/is);
+
+                    let engPart = engMatch ? engMatch[1].trim() : content;
+                    let hiPart = hiMatch ? hiMatch[1].trim() : "";
+
+                    const engWords = engPart.split(',').map(k => k.trim()).filter(Boolean);
+                    const hiWords = hiPart.split(',').map(k => k.trim()).filter(Boolean);
+
+                    let engHTML = "";
+                    let hiHTML = "";
+
+                    if (engWords.length > 0) {
+                        engHTML = `<div class='mb-1 text-primary fw-semibold'>English:</div>` +
+                            engWords.map(k => `<span class="keyword-chip eng">${k}</span>`).join(' ');
+                    }
+
+                    if (hiWords.length > 0) {
+                        hiHTML = `<div class='mt-2 text-warning fw-semibold'>हिन्दी:</div>` +
+                            hiWords.map(k => `<span class="keyword-chip hi">${k}</span>`).join(' ');
+                    }
+
+                    box.innerHTML = engHTML + hiHTML || "<em>No keywords detected.</em>";
+                } 
+                else {
+                    // 📘 PYQ Mode
+                    const keywords = data.keywords.split(',');
+                    const chips = keywords.map(k =>
+                        `<span class="keyword-chip pyq">${k.trim()}</span>`
+                    ).join(' ');
+                    box.innerHTML = chips;
+                }
+
+                this.classList.replace(mode === 'pyq' ? 'btn-pyq' : 'btn-conceptual', 'btn-success');
+                this.innerHTML = '✅ Generated';
+            } else {
+                box.innerHTML = `<div class='text-danger'>❌ ${data.error}</div>`;
+            }
+        } catch (err) {
+            box.innerHTML = `<div class='text-danger'>Network error. Please try again.</div>`;
+        }
+
+        setTimeout(() => {
+            this.disabled = false;
+            this.innerHTML = origText;
+            this.classList.remove('btn-success');
+            this.classList.add(mode === 'pyq' ? 'btn-pyq' : 'btn-conceptual');
+        }, 2500);
+    });
+});
+</script>
+
+{% endblock %}

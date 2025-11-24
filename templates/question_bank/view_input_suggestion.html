@@ -1,0 +1,615 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% block title %}{{ question.brief_description|truncatewords:5 }} - Hajela's IAS Academy (HIA){% endblock %}
+
+{% block content %}
+<style>
+  .btn-gradient {
+  background: linear-gradient(to right, #3f51b5, #f44336);
+  border: none;
+}
+.btn-gradient:hover {
+  opacity: 0.9;
+}
+
+</style>
+<div class="container py-5">
+  <!-- Post Header -->
+  <div class="text-center mb-5">
+    <h3>{{ question.brief_description|safe }}</h3>
+  </div>
+
+  <!-- Post Content -->
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="mb-5">
+        <p>{{ question.details|safe }}</p>
+      </div>
+
+      <!-- Details -->
+      <hr/>
+      {% comment %} <div class="mb-4">
+        <p class="card-text">
+          <strong>Exam:</strong>
+          {% if question.exams.exists %}
+            {{ question.exams.all|join:", " }}
+          {% else %}
+            No Exam specified.
+          {% endif %}
+          <br>
+
+          <strong>Area:</strong>
+          {% if question.area_name.exists %}
+            {{ question.area_name.all|join:", " }}
+          {% else %}
+            No Area specified.
+          {% endif %}
+          <br>
+
+          {% if question.part_name.exists %}
+            <strong>Part:</strong>
+            {{ question.part_name.all|join:", " }}
+            <br>
+          {% endif %}
+
+          {% if question.chapter_name.exists %}
+            <strong>Chapter:</strong>
+            {{ question.chapter_name.all|join:", " }}
+            <br>
+          {% endif %}
+
+          {% if question.topic_name.exists %}
+            <strong>Topic:</strong>
+            {{ question.topic_name.all|join:", " }}
+            <br>
+          {% endif %}
+
+          {% if question.subtopic_name.exists %}
+            <strong>Sub-Topic:</strong>
+            {{ question.subtopic_name.all|join:", " }}
+            <br>
+          {% endif %}
+
+          {% if question.credit_or_courtesy %}
+            <strong>Credit/Courtesy:</strong> {{ question.credit_or_courtesy }}
+            <br>
+          {% endif %}
+        </p>
+      </div> {% endcomment %}
+
+      <!-- Link -->
+      {% if question.question_link %}
+  <div class="mb-4">
+    <h5>Resource Links:</h5>
+    <ul class="mb-0">
+      {% for link in question.question_link|split:"," %}
+        {% if link.strip %}
+          <li>
+            <a href="{{ link.strip }}" target="_blank">{{ link.strip }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+      <hr> 
+      <!-- Video -->
+      {% if question.question_video %}
+        <div class="mb-4">
+          <h5>Video:</h5>
+          <video width="100%" controls>
+            <source src="{{ question.question_video.url }}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      {% endif %}
+
+      <!-- Images Tabs -->
+      {% if question.images.exists %}
+        <h3>Images:</h3>
+        <ul class="nav nav-tabs" role="tablist">
+          {% for image in question.images.all %}
+            <li class="nav-item" role="presentation">
+              <button class="nav-link {% if forloop.first %}active{% endif %}"
+                      id="image-tab-{{ forloop.counter }}"
+                      data-bs-toggle="tab"
+                      data-bs-target="#image-{{ forloop.counter }}"
+                      type="button"
+                      role="tab"
+                      aria-controls="image-{{ forloop.counter }}"
+                      aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                <img src="{{ image.image.url }}" alt="Image" class="img-fluid" style="max-width: 100px;">
+              </button>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <div class="tab-content mt-3">
+          {% for image in question.images.all %}
+            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+                 id="image-{{ forloop.counter }}" 
+                 role="tabpanel" 
+                 aria-labelledby="image-tab-{{ forloop.counter }}">
+              <img src="{{ image.image.url }}" alt="Image" class="img-fluid">
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <hr>
+      <!-- Documents -->
+      {% if question.documents.exists %}
+        <h5 class="mt-4">Documents:</h5>
+        <ul>
+          {% for document in question.documents.all %}
+            <li>
+              <a href="{{ document.document.url }}" download>
+                <!-- ✅ Use safe fallback: show the last part after '/' -->
+                {{ document.document.name|cut:"input_suggestion/documents/" }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      <br><br>
+    <hr><hr>
+    <h1 style="color: #ff6400;">From Hajela's IAS Database Materials </h1>
+    <p> (Topic Related --> Questions, Notes, Videos Lecturer, Image... ) </p>
+    
+    <div class="container py-5">
+      <h2 class="text-center mb-3">HIA Questions Bank</h2>
+
+      <!-- ✅ Debug count -->
+      <p class="text-muted text-center">
+        Found Related Questions: {{ grouped_questions|length }}
+      </p>
+
+      {% if grouped_questions and grouped_questions|length > 0 %}
+        <div class="row">
+          {% for base_id, pair in grouped_questions.items %}
+            <div class="row mb-4">
+
+              <!-- ✅ English Column -->
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header bg-light fw-bold">
+                    English — Question 
+                    {% if pair.english %}{{ pair.english.question_number }}{% else %}Not Uploaded{% endif %}
+                    {% if pair.english %}
+                      <p>Type Of Question → {{ pair.english.question_sub_type }}</p>
+                    {% endif %}
+                  </div>
+                  <div class="card-body">
+                    {% if pair.english %}
+                      {% if pair.english.question_sub_type in 'simple_type true_and_false_type fill_in_the_blank_type' %}
+                        <p>{{ pair.english.question_part_first }}</p>
+                      {% elif pair.english.question_sub_type == 'r_and_a_type' %}
+                        <p>{{ pair.english.question_part_first }}</p>
+                        <p style="color:#ea5323;">Assertion:</p>
+                        <p>{{ pair.english.assertion }}</p>
+                        <p style="color:rgb(0 63 137);">Reason:</p>
+                        <p>{{ pair.english.reason }}</p>
+                      {% elif pair.english.question_sub_type == 'list_type_1' %}
+                        <p><strong>{{ pair.english.question_part_first }}</strong></p>
+                        <ol>
+                          {% for i in 1|to_range:8 %}
+                            {% with field="list_1_row"|add:i|stringformat:"s" %}
+                              {% with item=pair.english|get_dynamic_field:field %}
+                                {% if item %}<li>{{ item }}</li>{% endif %}
+                              {% endwith %}
+                            {% endwith %}
+                          {% endfor %}
+                        </ol>
+                        <p><strong>{{ pair.english.question_part_third }}</strong></p>
+                      {% elif pair.english.question_sub_type == 'list_type_2' %}
+                        <p>{{ pair.english.question_part_first }}</p>
+                        <table class="table">
+                          <thead>
+                            <tr>
+                              <th>{{ pair.english.list_1_name|default:"List-I" }}</th>
+                              <th>{{ pair.english.list_2_name|default:"List-II" }}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <ol type="A">
+                                  {% for item in pair.english.list_1_items %}
+                                    <li>{{ item }}</li>
+                                  {% endfor %}
+                                </ol>
+                              </td>
+                              <td>
+                                <ol type="1">
+                                  {% for item in pair.english.list_2_items %}
+                                    <li>{{ item }}</li>
+                                  {% endfor %}
+                                </ol>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      {% endif %}
+
+                      <p>(a) {{ pair.english.answer_option_a }}</p>
+                      <p>(b) {{ pair.english.answer_option_b }}</p>
+                      <p>(c) {{ pair.english.answer_option_c }}</p>
+                      <p>(d) {{ pair.english.answer_option_d }}</p>
+                      <hr>
+                      <p><strong>Correct Answer:</strong> {{ pair.english.correct_answer_choice }}</p>
+                      <p><strong>Solution:</strong> {{ pair.english.correct_answer_description }}</p>
+                    {% else %}
+                      <p class="text-danger">English version not uploaded.</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- ✅ Hindi Column -->
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header bg-light fw-bold">
+                    Hindi — Question 
+                    {% if pair.hindi %}{{ pair.hindi.question_number }}{% else %}Not Uploaded{% endif %}
+                    {% if pair.hindi %}
+                      <p>Type Of Question → {{ pair.hindi.question_sub_type }}</p>
+                    {% endif %}
+                  </div>
+                  <div class="card-body">
+                    {% if pair.hindi %}
+                      {% if pair.hindi.question_sub_type in 'simple_type true_and_false_type fill_in_the_blank_type' %}
+                        <p>{{ pair.hindi.question_part_first_hi|default:"-" }}</p>
+                      {% elif pair.hindi.question_sub_type == 'r_and_a_type' %}
+                        <p>{{ pair.hindi.question_part_first_hi|default:"-" }}</p>
+                        <p style="color:#ea5323;">Assertion:</p>
+                        <p>{{ pair.hindi.assertion_hi|default:"-" }}</p>
+                        <p style="color:rgb(0 63 137);">Reason:</p>
+                        <p>{{ pair.hindi.reason_hi|default:"-" }}</p>
+                      {% elif pair.hindi.question_sub_type == 'list_type_1' %}
+                        <p><strong>{{ pair.hindi.question_part_first_hi|default:"-" }}</strong></p>
+                        <ol>
+                          {% for i in 1|to_range:8 %}
+                            {% with field="list_1_row"|add:i|stringformat:"s"|add:"_hi" %}
+                              {% with item=pair.hindi|get_dynamic_field:field %}
+                                {% if item %}<li>{{ item }}</li>{% endif %}
+                              {% endwith %}
+                            {% endwith %}
+                          {% endfor %}
+                        </ol>
+                        <p><strong>{{ pair.hindi.question_part_third_hi|default:"-" }}</strong></p>
+                      {% elif pair.hindi.question_sub_type == 'list_type_2' %}
+                        <p>{{ pair.hindi.question_part_first_hi|default:"-" }}</p>
+                        <table class="table">
+                          <thead>
+                            <tr><th>List-I (हिंदी)</th><th>List-II (हिंदी)</th></tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <ol>
+                                  {% for item in pair.hindi|get_list_items_hi:"list_1" %}
+                                    <li>{{ item }}</li>
+                                  {% endfor %}
+                                </ol>
+                              </td>
+                              <td>
+                                <ol>
+                                  {% for item in pair.hindi|get_list_items_hi:"list_2" %}
+                                    <li>{{ item }}</li>
+                                  {% endfor %}
+                                </ol>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      {% endif %}
+                      <p>(a) {{ pair.hindi.answer_option_a_hi }}</p>
+                      <p>(b) {{ pair.hindi.answer_option_b_hi }}</p>
+                      <p>(c) {{ pair.hindi.answer_option_c_hi }}</p>
+                      <p>(d) {{ pair.hindi.answer_option_d_hi }}</p>
+                      <hr>
+                      <p><strong>Correct Answer:</strong> {{ pair.hindi.correct_answer_choice }}</p>
+                      <p><strong>Answer Description:</strong> {{ pair.hindi.correct_answer_description_hi|default:"-" }}</p>
+                    {% else %}
+                      <p class="text-danger">Hindi version not uploaded.</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- ✅ Common Meta -->
+              <div class="col-md-12 mt-3">
+                <div class="card">
+                  <div class="card-body row">
+                    <div class="col-md-6">
+                      {% if pair.english %}
+                        <p><strong>Marks:</strong> {{ pair.english.marks }}</p>
+                        <p><strong>Negative Marks:</strong> {{ pair.english.negative_marks }}</p>
+                        <p><strong>Degree of Difficulty:</strong> {{ pair.english.degree_of_difficulty }}</p>
+                        <p><strong>Elimination Tactics Degree:</strong> {{ pair.english.elim_tactics_degree }}</p>
+                        <p><strong>Current Relevance:</strong> {{ pair.english.current_relevance }}</p>
+                        <p><strong>Current Relevance Topic:</strong> {{ pair.english.current_relevance_topic }}</p>
+                        <p><strong>Created At:</strong> {{ pair.english.created_at|date:"Y-m-d H:i" }}</p>
+                        <p><strong>Created By:</strong> {{ pair.english.created_by }}</p>
+                      {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                      {% if pair.english %}
+                        <p><strong>Area(s):</strong> {% for a in pair.english.area_name.all %}{{ a.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}</p>
+                        <p><strong>Section(s):</strong> {% for s in pair.english.section_name.all %}{{ s.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}</p>
+                        <p><strong>Part(s):</strong> {% for p in pair.english.part_name.all %}{{ p.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}</p>
+                        <p><strong>Chapter(s):</strong> {% for c in pair.english.chapter_name.all %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}</p>
+                        <p><strong>Topic(s):</strong> {% for t in pair.english.topic_name.all %}{{ t.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}</p>
+                        <p><strong>Sub-topic(s):</strong> {% for st in pair.english.subtopic_name.all %}{{ st.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-center text-danger">
+          No related questions found for the selected filters.
+        </p>
+      {% endif %}
+    </div>
+
+<hr>
+<h2 class="text-center my-4">Lecture Notes Library</h2>
+
+{% if related_notes %}
+    <style>
+    /* Position navigation buttons at top */
+    #lectureNotesCarousel .carousel-control-prev,
+    #lectureNotesCarousel .carousel-control-next {
+      top: 10px;
+      bottom: auto;
+      width: auto;
+      height: auto;
+    }
+
+    #lectureNotesCarousel .carousel-control-prev {
+      left: 15px;
+    }
+
+    #lectureNotesCarousel .carousel-control-next {
+      right: 15px;
+    }
+
+    #lectureNotesCarousel .carousel-control-prev span,
+    #lectureNotesCarousel .carousel-control-next span {
+      font-size: 2rem;
+      color: #000;
+    }
+  </style>
+
+  <div id="lectureNotesCarousel" class="carousel slide" data-bs-ride="false" data-bs-interval="false">
+
+
+    <!-- Prev Button -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#lectureNotesCarousel" data-bs-slide="prev">
+      <span class="bi bi-chevron-left" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+
+    <!-- Next Button -->
+    <button class="carousel-control-next" type="button" data-bs-target="#lectureNotesCarousel" data-bs-slide="next">
+      <span class="bi bi-chevron-right" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+
+    <div class="carousel-inner mt-5">
+      {% for note in related_notes %}
+        {% if forloop.counter0|divisibleby:2 %}
+          <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            <div class="row">
+        {% endif %}
+
+        <div class="col-md-6 mb-4">
+          <div class="card shadow p-3 h-100">
+            <h5 class="fw-bold">{{ note.title }}</h5>
+            <p><strong>Area:</strong> {{ note.area.name }}</p>
+            <p><strong>Part:</strong> {{ note.part.name }}</p>
+            <p><strong>Chapter:</strong> {{ note.chapter.name }}</p>
+            {% if note.topic %}
+              <p><strong>Topic:</strong> {{ note.topic.name }}</p>
+            {% endif %}
+            <p><strong>Language:</strong> {{ note.get_language_display }}</p>
+            <p><strong>Type:</strong> {{ note.note_file.name|slice:'-3'|upper }}</p>
+            <p><strong>Uploaded:</strong> {{ note.created_at|date:"M d, Y" }}</p>
+            <p><strong>Created By:</strong> {{ note.created_by.email }} ({{ note.created_by.get_user_type_display }})</p>
+
+            <div class="d-grid gap-2 mt-3">
+              <a href="{% url 'view_lecture_note_detail' note.id %}" class="btn btn-gradient text-white">
+                📖 View Flipbook
+              </a>
+              <a href="{{ note.note_file.url }}" class="btn btn-outline-primary" download>
+                ⬇️ Download File
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {% if forloop.counter0|add:'1'|divisibleby:2 or forloop.last %}
+            </div> <!-- .row -->
+          </div> <!-- .carousel-item -->
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+{% else %}
+  <p class="text-muted text-center">No related notes found for this chapter.</p>
+{% endif %}
+
+<hr>
+<h2 class="text-center my-4">🎥 Videos Lecture Library</h2>
+
+<div id="videoLectureCarousel" class="carousel slide" data-bs-ride="false" data-bs-interval="false">
+  <div class="carousel-inner">
+
+    {% for i in "12" %}  {# Show 2 slides with 2 videos each #}
+      {% if forloop.counter0|divisibleby:2 %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          <div class="row">
+      {% endif %}
+
+      <div class="col-md-6 mb-4">
+        <div class="card shadow p-3">
+          <div class="ratio ratio-16x9 mb-3">
+            <!-- Embedded playlist or single video -->
+            <iframe 
+              src="https://www.youtube.com/embed/b7taJrv3cgc?list=PLEmoaCdxLK_0HJnQ0wyTUUjwhv1_P_70Q" 
+              title="Video Lecture {{ forloop.counter }}" 
+              allowfullscreen>
+            </iframe>
+          </div>
+          <h5 class="fw-bold">Video Lecture {{ forloop.counter }}</h5>
+          <p><strong>Subject:</strong> General Studies</p>
+          <p><strong>Uploaded:</strong> July 2025</p>
+          <p class="text-muted">This video is part of a YouTube playlist on GS lectures by Hajela IAS Academy.</p>
+        </div>
+      </div>
+      
+      {% if forloop.counter0|add:'1'|divisibleby:2 or forloop.last %}
+          </div> <!-- .row -->
+        </div> <!-- .carousel-item -->
+      {% endif %}
+    {% endfor %}
+
+  </div>
+
+  <!-- Carousel Controls -->
+  <button class="carousel-control-prev" type="button" data-bs-target="#videoLectureCarousel" data-bs-slide="prev">
+    <span class="bi bi-chevron-left fs-1 text-dark" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#videoLectureCarousel" data-bs-slide="next">
+    <span class="bi bi-chevron-right fs-1 text-dark" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <div class="p-4 mb-3 bg-light rounded">
+        <h5>Additional Information</h5>
+        {% if question.created_by %}
+          <p class="text-muted">
+            <strong>Posted by:</strong> {{ question.created_by.get_full_name|default:question.created_by.email }}
+          </p>
+        {% endif %}
+        <p class="text-muted">
+          <strong>Posted on:</strong> {{ question.created_at|date:"F j, Y" }}
+        </p>
+        <hr>
+        {% if question.current_relevance %}
+          <p class="text-muted">
+            <strong>Current Relevance:</strong>
+            {% if question.current_relevance == '0' %} Not Relevant
+            {% elif question.current_relevance == '1' %} Moderately Relevant
+            {% elif question.current_relevance == '2' %} Very Relevant
+            {% else %} {{ question.current_relevance }}
+            {% endif %}
+          </p>
+        {% endif %}
+
+        {% if question.current_relevance_topic %}
+          <p class="text-muted">
+            <strong>Relevance Topic:</strong> {{ question.current_relevance_topic }}
+          </p>
+        {% endif %}
+        <hr>
+        <p class="card-text">
+          <strong>Exam:</strong>
+          {% if question.exams.exists %}
+            {{ question.exams.all|join:", " }}
+          {% else %}
+            No Exam specified.
+          {% endif %}
+          <br>
+
+          <strong>Area:</strong>
+          {% if question.area_name.exists %}
+            {{ question.area_name.all|join:", " }}
+          {% else %}
+            No Area specified.
+          {% endif %}
+          <br>
+
+          {% if question.part_name.exists %}
+            <strong>Part:</strong>
+            {{ question.part_name.all|join:", " }}
+            <br>
+          {% endif %}
+
+          {% if question.chapter_name.exists %}
+            <strong>Chapter:</strong>
+            {{ question.chapter_name.all|join:", " }}
+            <br>
+          {% endif %}
+
+          {% if question.topic_name.exists %}
+            <strong>Topic:</strong>
+            {{ question.topic_name.all|join:", " }}
+            <br>
+          {% endif %}
+
+          {% if question.subtopic_name.exists %}
+            <strong>Sub-Topic:</strong>
+            {{ question.subtopic_name.all|join:", " }}
+            <br>
+          {% endif %}
+          
+          <strong>Sub-Topic Short Code:</strong>
+    {% for subtopic in question.subtopic_name.all %}
+        {{ subtopic.sub_topic_short_Code }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+    <br>
+
+          {% if question.credit_or_courtesy %}
+            <strong>Credit/Courtesy:</strong> {{ question.credit_or_courtesy }}
+            <br>
+          {% endif %}
+        </p>
+        <hr>
+        {% if question.other_text %}
+          <p>{{ question.other_text }}</p>
+        {% endif %}
+      </div>
+      <br>
+      <div class="p-4 mb-3 bg-light rounded">
+  <h5>#Tags</h5>
+
+  <p class="text-muted">
+  {% if question.hashtags.exists %}
+    {% for hashtag in question.hashtags.all %}
+      <strong>
+        {% if hashtag.hashtags_SI_Number %}
+          <a href="{% url 'hashtag_detail' slug=hashtag.hashtags_SI_Number %}">
+            #{{ hashtag.name }}
+          </a>
+        {% else %}
+          <span class="badge bg-secondary">#{{ hashtag.name }}</span>
+        {% endif %}
+      </strong>
+      {% if not forloop.last %}&nbsp;{% endif %}
+    {% endfor %}
+  {% else %}
+    <span class="text-muted">No hashtags tagged for this suggestion.</span>
+  {% endif %}
+</p>
+
+  <hr>
+</div>
+
+    </div>
+    
+  </div>
+</div>
+{% endblock %}

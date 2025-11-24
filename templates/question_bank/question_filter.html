@@ -1,0 +1,441 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block title %}Filter Questions{% endblock %}
+
+{% block content %}
+
+<style>
+    body { background-color: #f8f9fa; }
+    .filter-section, .result-section, .filtered-questions-section {
+        background: white; padding: 20px; border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .filter-button {
+        background: linear-gradient(to right, #403e7b, #cc5742);
+        border: none; color: white; padding: 10px; border-radius: 5px; width: 100%;
+    }
+    .result-header {
+        background: #003f89; color: white; padding: 10px;
+        border-radius: 10px 10px 0 0; font-size: 1.2rem; font-weight: bold;
+    }
+    .scrollable-content {
+        max-height: 400px; overflow-y: auto; padding: 15px;
+    }
+    .fade-in {
+  display: none;
+}
+
+</style>
+
+<!-- ✅ Global CSRF token -->
+<input type="hidden" id="globalCsrf" value="{{ csrf_token }}">
+
+<div class="container my-4">
+  <div class="row g-4">
+
+    <!-- ✅ Filter Section -->
+    <div class="col-lg-3">
+      <div class="filter-section">
+        <h2 class="mb-3">Filter Questions</h2>
+        <form id="filterForm" method="get">
+          <div class="mb-3">
+            <label class="form-label">Area</label>
+            <select class="form-select" id="filterArea" name="area" required>
+              <option value="">Select Area</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Section</label>
+            <select class="form-select" id="filterSection" name="section" disabled>
+              <option value="">Select Section</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Part</label>
+            <select class="form-select" id="filterPart" name="part" disabled>
+              <option value="">Select Part</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Chapter</label>
+            <select class="form-select" id="filterChapter" name="chapter" disabled>
+              <option value="">Select Chapter</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Topic</label>
+            <select class="form-select" id="filterTopic" name="topic" disabled>
+              <option value="">Select Topic</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Question Sub Type</label>
+            <select class="form-select" name="question_sub_type" id="questionSubType">
+              <option value="">Select Sub Type</option>
+              {% for value, label in question_types %}
+                <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Created At</label>
+            <input type="date" class="form-control" name="created_at" id="createdAt">
+          </div>
+          <button type="submit" class="filter-button btn btn-primary">Filter</button>
+        </form>
+      </div>
+    </div>
+
+ <!-- ✅ Filtered Questions Section -->
+    <div class="col-lg-5" style="width: 75%;">
+      <div class="filtered-questions-section">
+        <h5 class="mb-3">Filtered Questions</h5>
+        <div class="scrollable-content">
+          <div class="card-body">
+            {% for base_id, pair in grouped_questions.items %}
+            <div class="row gx-3 mb-4">
+              
+              <!-- English -->
+              <div class="col-md-6">
+                {% if pair.english %}
+                <div class="card h-100">
+                  <div class="card-header bg-primary text-white fw-bold">
+                    English — Q{{ pair.english.question_number|default:"N/A" }}
+                    <small class="d-block">Type: {{ pair.english.question_sub_type }}</small>
+                  </div>
+                  <div class="card-body">
+                    {% if pair.english.question_sub_type in "simple_type true_and_false_type fill_in_the_blank_type" %}
+                      <p>{{ pair.english.question_part_first|default:pair.english.question_part }}</p>
+                    {% elif pair.english.question_sub_type == "r_and_a_type" %}
+                      <p><strong>Assertion:</strong> {{ pair.english.assertion }}</p>
+                      <p><strong>Reason:</strong> {{ pair.english.reason }}</p>
+                      <p>{{ pair.english.question_part_third }}</p>
+                    {% elif pair.english.question_sub_type == "list_type_1" %}
+    <p><strong>{{ pair.english.question_part_first|default:"-" }}</strong></p>
+    <ul style="list-style: none; margin-left: 10px; padding-left: 0;">
+        {% for item in pair.english.list_1_items %}
+            <li style="margin-bottom: 6px;">
+                ({{ forloop.counter }}). {{ item }}
+            </li>
+        {% empty %}
+            <li>No items</li>
+        {% endfor %}
+    </ul>
+    <p><strong>{{ pair.english.question_part_third|default:"-" }}</strong></p>
+
+
+{% elif pair.english.question_sub_type == "list_type_2" %}
+    <p><strong>{{ pair.english.question_part_first|default:"-" }}</strong></p>
+
+    <table class="table table-bordered align-middle" style="width:100%; text-align:left;">
+        <thead class="table-light">
+            <tr>
+                <th>{{ pair.english.list_1_name|default:"List-I" }}</th>
+                <th>{{ pair.english.list_2_name|default:"List-II" }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="vertical-align: top;">
+                    <ul style="list-style: none; padding-left: 0; margin: 0;">
+                        {% for item in pair.english.list_1_items %}
+                            <li style="margin-bottom: 6px;">
+                                ({{ forloop.counter|to_letter }}). {{ item }}
+                            </li>
+                        {% empty %}
+                            <li>No items</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td style="vertical-align: top;">
+                    <ul style="list-style: none; padding-left: 0; margin: 0;">
+                        {% for item in pair.english.list_2_items %}
+                            <li style="margin-bottom: 6px;">
+                                ({{ forloop.counter }}). {{ item }}
+                            </li>
+                        {% empty %}
+                            <li>No items</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+{% endif %}
+
+
+                    <p>(a) {{ pair.english.answer_option_a }}</p>
+                    <p>(b) {{ pair.english.answer_option_b }}</p>
+                    <p>(c) {{ pair.english.answer_option_c }}</p>
+                    <p>(d) {{ pair.english.answer_option_d }}</p>
+                    <p><strong>Correct:</strong> {{ pair.english.correct_answer_choice }}</p>
+                    <p><strong>Solution:</strong> {{ pair.english.correct_answer_description }}</p>
+                    <button class="btn btn-danger btn-sm w-100 mt-2"
+                            onclick="generateAlternateQuestion({{ pair.english.id }})"
+                            data-question-id="{{ pair.english.id }}">
+                      Generate Alternate Question
+                    </button>
+
+                    <button class="btn btn-info btn-sm w-100 mt-2"
+                            onclick="generatePyqKeywords({{ pair.english.id }})"
+                            data-question-id="{{ pair.english.id }}">
+                      Generate Keywords
+                    </button>
+
+                  </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">English version not uploaded.</div>
+                {% endif %}
+              </div>
+
+              <!-- Hindi -->
+              <div class="col-md-6">
+                {% if pair.hindi %}
+                <div class="card h-100">
+                  <div class="card-header bg-success text-white fw-bold">
+                    Hindi — Q{{ pair.hindi.question_number|default:"N/A" }}
+                    <small class="d-block">Type: {{ pair.hindi.question_sub_type }}</small>
+                  </div>
+                  <div class="card-body">
+                    <!-- display logic for Hindi question -->
+                    <p><strong>Correct:</strong> {{ pair.hindi.correct_answer_choice }}</p>
+                    <p><strong>Solution:</strong> {{ pair.hindi.correct_answer_description_hi }}</p>
+
+                    <!-- ✅ Buttons -->
+                    <button class="btn btn-danger btn-sm w-100 mt-2"
+                            onclick="generateAlternateQuestion({{ pair.hindi.id }})">
+                      Generate Alternate Question
+                    </button>
+                    <button class="btn btn-info btn-sm w-100 mt-2"
+                            onclick="generatePyqKeywords({{ pair.hindi.id }})">
+                      Generate Keywords
+                    </button>
+                  </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">Hindi version not uploaded.</div>
+                {% endif %}
+              </div>
+
+            </div>
+            {% empty %}
+            <p class="text-danger">No questions found.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ✅ AI Generated Result Section -->
+    <div class="col-lg-12">
+      <div id="ai-generated-section" class="result-section">
+        <div class="result-header">AI Generated Result</div>
+        <p>Choose any question and click <b>Generate Alternate Question</b> then wait for QuestCurator result!</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block custom_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+// ✅ Generate Alternate Question
+function generateAlternateQuestion(questionId) {
+    const csrfToken = document.getElementById("globalCsrf")?.value || "";
+    const button = event.target;
+    button.disabled = true;
+    const originalText = button.innerHTML;
+    button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Please wait...`;
+
+    $('#ai-generated-section').html(`
+        <div class="result-header">AI Generated Result</div>
+        <div class="fade-in text-center p-3">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-3 fw-bold text-secondary">Please wait... generating alternate question 😊</p>
+        </div>
+    `).fadeIn(400);
+
+    $.ajax({
+        url: "{% url 'generate_alternate_question' %}",
+        type: "POST",
+        data: {
+            question_id: questionId,
+            csrfmiddlewaretoken: csrfToken
+        },
+        success: function (response) {
+            $('#ai-generated-section').hide().html(response.html).fadeIn(400);
+
+            // ✅ Disable this button permanently
+            markButtonCompleted(button, "Generated");
+
+            // ✅ Save to localStorage
+            const generated = JSON.parse(localStorage.getItem("generatedAlternateQuestions") || "[]");
+            if (!generated.includes(questionId)) {
+                generated.push(questionId);
+                localStorage.setItem("generatedAlternateQuestions", JSON.stringify(generated));
+            }
+        },
+        error: function (xhr) {
+            console.error("Error Response:", xhr.responseText);
+            $('#ai-generated-section').html(`
+                <div class="result-header">AI Generated Result</div>
+                <div class="alert alert-danger m-3">❌ Something went wrong! Unable to generate alternate question.</div>
+            `);
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    });
+}
+
+// ✅ Generate Keywords
+function generatePyqKeywords(questionId) {
+    const csrfToken = document.getElementById("globalCsrf")?.value || "";
+    const button = event.target;
+    button.disabled = true;
+    const originalText = button.innerHTML;
+    button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Extracting...`;
+
+    $('#ai-generated-section').html(`
+        <div class="result-header">AI Generated Keywords</div>
+        <div class="fade-in text-center p-3">
+            <div class="spinner-border text-info" role="status"></div>
+            <p class="mt-3 fw-bold text-secondary">Extracting keywords for this question...</p>
+        </div>
+    `).fadeIn(400);
+
+    $.ajax({
+        url: "{% url 'generate_pyq_keywords' %}",
+        type: "POST",
+        data: {
+            question_id: questionId,
+            csrfmiddlewaretoken: csrfToken
+        },
+        success: function (response) {
+            $('#ai-generated-section').hide().html(response.html).fadeIn(400);
+
+            // ✅ Disable permanently
+            markButtonCompleted(button, "Keywords Extracted");
+
+            // ✅ Save to localStorage
+            const keywords = JSON.parse(localStorage.getItem("generatedKeywords") || "[]");
+            if (!keywords.includes(questionId)) {
+                keywords.push(questionId);
+                localStorage.setItem("generatedKeywords", JSON.stringify(keywords));
+            }
+        },
+        error: function (xhr) {
+            console.error("Error Response:", xhr.responseText);
+            $('#ai-generated-section').html(`
+                <div class="result-header">AI Generated Keywords</div>
+                <div class="alert alert-danger m-3">❌ Failed to generate keywords.</div>
+            `);
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    });
+}
+
+// ✅ Helper function for visual feedback
+function markButtonCompleted(button, text) {
+    button.disabled = true;
+    button.innerHTML = `✅ ${text}`;
+    button.classList.remove("btn-danger", "btn-info");
+    button.classList.add("btn-success");
+}
+
+    // ✅ Filters for cascading dropdowns
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterArea = document.getElementById('filterArea');
+        const filterSection = document.getElementById('filterSection');
+        const filterPart = document.getElementById('filterPart');
+        const filterChapter = document.getElementById('filterChapter');
+        const filterTopic = document.getElementById('filterTopic');
+
+        fetch('/question-bank/get-areas/')
+            .then(response => response.json())
+            .then(data => populateDropdown(filterArea, data.areas, 'area_SI_Code'));
+
+        filterArea.addEventListener('change', () => {
+            const areaId = filterArea.value;
+            if (!areaId) return;
+            fetch(`/question-bank/get-sections-list/?area_ids[]=${areaId}`)
+                .then(res => res.json())
+                .then(data => {
+                    populateDropdown(filterSection, data.sections, 'section_Unit_SI');
+                    filterSection.disabled = false;
+                    resetDropdown(filterPart); resetDropdown(filterChapter); resetDropdown(filterTopic);
+                });
+        });
+
+        filterSection.addEventListener('change', () => {
+            const sectionId = filterSection.value;
+            if (!sectionId) return;
+            fetch(`/question-bank/get-parts-list/?section_ids[]=${sectionId}`)
+                .then(res => res.json())
+                .then(data => {
+                    populateDropdown(filterPart, data.parts, 'part_serial');
+                    filterPart.disabled = false;
+                    resetDropdown(filterChapter); resetDropdown(filterTopic);
+                });
+        });
+
+        filterPart.addEventListener('change', () => {
+            const partId = filterPart.value;
+            if (!partId) return;
+            fetch(`/question-bank/get-chapters-list/?part_ids[]=${partId}`)
+                .then(res => res.json())
+                .then(data => {
+                    populateDropdown(filterChapter, data.chapters, 'chapter_number');
+                    filterChapter.disabled = false;
+                    resetDropdown(filterTopic);
+                });
+        });
+
+        filterChapter.addEventListener('change', () => {
+            const chapterId = filterChapter.value;
+            if (!chapterId) return;
+            fetch(`/question-bank/get-topics-list/?chapter_ids[]=${chapterId}`)
+                .then(res => res.json())
+                .then(data => {
+                    populateDropdown(filterTopic, data.topics, 'topic_SI_number');
+                    filterTopic.disabled = false;
+                });
+        });
+
+        function populateDropdown(dropdown, data, idKey) {
+            dropdown.innerHTML = `<option value="">Select ${dropdown.getAttribute('name') || 'Option'}</option>`;
+            data.forEach(item => {
+                dropdown.innerHTML += `<option value="${item[idKey]}">${item.name}</option>`;
+            });
+        }
+
+        function resetDropdown(dropdown) {
+            dropdown.innerHTML = `<option value="">Select ${dropdown.getAttribute('name') || 'Option'}</option>`;
+            dropdown.disabled = true;
+        }
+    });
+    // ✅ Restore disabled state from localStorage
+    document.addEventListener("DOMContentLoaded", function () {
+        const generatedAlt = JSON.parse(localStorage.getItem("generatedAlternateQuestions") || "[]");
+        const generatedKeys = JSON.parse(localStorage.getItem("generatedKeywords") || "[]");
+
+        document.querySelectorAll("button[data-question-id]").forEach(btn => {
+            const qid = parseInt(btn.getAttribute("data-question-id"));
+
+            if (generatedAlt.includes(qid) && btn.textContent.includes("Alternate")) {
+                markButtonCompleted(btn, "Generated");
+           }
+
+           if (generatedKeys.includes(qid) && btn.textContent.includes("Keywords")) {
+               markButtonCompleted(btn, "Keywords Extracted");
+            }
+      });
+    });
+
+</script>
+{% endblock %}

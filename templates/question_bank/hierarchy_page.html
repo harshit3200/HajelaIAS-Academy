@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Area → Part → Chapter → Topic → SubTopic</title>
+  <style>
+    ul { list-style-type: none; padding-left: 20px; }
+    .toggle { cursor: pointer; color: blue; }
+    .nested { display: none; }
+    .active { display: block; }
+  </style>
+</head>
+<body>
+  <h1>Area → Part → Chapter → Topic → SubTopic</h1>
+
+  <ul>
+    {% for area in areas %}
+      <li>
+        <span class="toggle">▶ {{ area.name }}</span>
+        <ul class="nested">
+          {% for section in area.sections.all %}
+            {% for part in section.parts.all %}
+              <li>
+                <span class="toggle">▶ {{ part.name }}</span>
+                <ul class="nested">
+                  {% for chapter in part.chapters.all %}
+                    <li>
+                      <span class="toggle">▶ {{ chapter.name }}</span>
+                      <ul class="nested">
+                        {% for topic in chapter.topics.all %}
+                          <li>
+                            <span class="toggle">▶ {{ topic.name }}</span>
+                            <ul class="nested">
+                              {% for sub in topic.sub_topics.all %}
+                                <li>{{ sub.name }} (Non-CTPL: {{ sub.sub_topic_Code_Non_CTPL }})</li>
+                              {% endfor %}
+                            </ul>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <script>
+    const toggles = document.querySelectorAll(".toggle");
+    toggles.forEach(toggle => {
+      toggle.addEventListener("click", function() {
+        const nested = this.nextElementSibling;
+        if (nested) {
+          nested.classList.toggle("active");
+          this.textContent = this.textContent.startsWith('▶') 
+            ? this.textContent.replace('▶', '▼') 
+            : this.textContent.replace('▼', '▶');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

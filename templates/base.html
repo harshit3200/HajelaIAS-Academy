@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!-- Mirrored from asset.uibucket.net/html/iLearning-dashboard/signup.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 15 Jul 2024 12:50:00 GMT -->
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hajela's IAS</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'assets/images/icons/logo1.svg' %}">
+    
+    <!-- Inter Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'assets/css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.min.css' %}">
+    
+    <!-- Bootstrap (Using Static) -->
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    
+    <!-- Other CSS files -->
+    <link rel="stylesheet" href="{% static 'assets/css/chosen.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/dropzone.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/file-upload-with-preview.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/video-js.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/responsive.css' %}">
+    
+    <!-- External Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <!-- Bootstrap CDN (optional, if you prefer CDN over static files) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Tiny MCE -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"
+        integrity="sha512-6JR4bbn8rCKvrkdoTJd/VFyXAN4CE9XMtgykPWgKiHjou56YDJxWsi90hAeMTYxNwUnKSQu9JPc3SQUg+aGCHw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Crisp Chat -->
+    <script>
+        window.$crisp = [];
+        window.CRISP_WEBSITE_ID = "c6b76f55-12b3-4e58-a551-d7fea841e5ae";
+        (function () {
+            var d = document;
+            var s = d.createElement("script");
+            s.src = "https://client.crisp.chat/l.js";  // Corrected URL
+            s.async = 1;
+            d.getElementsByTagName("head")[0].appendChild(s);
+        })();
+    </script>
+
+    <!-- Google Charts -->
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body class="user-body">
+<div id="ilearning-dashboard" class="ilearning-dashboard">
+        <div class="ilearning-dashboard-area">
+            <div class="ilearning-dashboard-wrapper">
+    {% comment %} <!-- <h1>Welcome to Hajela's IAS</h1> -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">Welcome to Hajela's IAS</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+    
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        {% if user.user_type == "admin" %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
+                            </li>
+                        {% elif user.user_type == "teacher" %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'teacher_dashboard' %}">Teacher Dashboard</a>
+                            </li>
+                        {% elif user.user_type == "staff" %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'staff_dashboard' %}">Staff Dashboard</a>
+                            </li>
+                        {% elif user.user_type == "student" %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'student_dashboard' %}">Student Dashboard</a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="nav-item">
+                            <a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link text-primary" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-success" href="{% url 'register' %}">Sign Up</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav> {% endcomment %}
+        {% block header %}
+    {% include 'includes/header.html' %}
+    {% endblock header %}
+
+    {% block content %}
+    {% endblock content %}
+
+    {% block footer %}
+    <!-- Footer Start -->
+    {% include 'includes/footer.html' %}
+    <!-- Footer End -->
+    {% endblock footer %}
+
+   </div>
+        </div>
+    </div> 
+
+<!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+<script src="{% static 'assets/js/jquery-3.6.4.min.js' %}"></script>
+<!-- Waypoint -->
+<script src="{% static 'assets/js/jquery.waypoints.min.js' %}"></script>
+<!-- Bootstrap -->
+<script src="{% static 'assets/js/popper.min.js' %}"></script>
+<script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+<!-- Font Awesome -->
+<script src="{% static 'assets/js/all.min.js' %}"></script>
+<script src="{% static 'assets/js/fontawesome.min.js' %}"></script>
+<!-- Chosen -->
+<script src="{% static 'assets/js/chosen.jquery.min.js' %}"></script>
+<!-- Circle Progress -->
+<script src="{% static 'assets/js/circle-progress.min.js' %}"></script>
+<!-- Chart JS -->
+<script src="{% static 'assets/js/chart.js' %}"></script>
+<!-- Google Chart -->
+<script src="{% static 'assets/js/google-chart.js' %}"></script>
+<!-- Video JS -->
+<script src="{% static 'assets/js/video.min.js' %}"></script>
+<script src="{% static 'assets/js/videojs-playlist.min.js' %}"></script>
+<!-- Dropzone -->
+<script src="{% static 'assets/js/dropzone.min.js' %}"></script>
+<!-- File Upload With Preview -->
+<script src="{% static 'assets/js/file-upload-with-preview.min.js' %}"></script>
+<!-- Select 2 -->
+<script src="{% static 'assets/js/select2.min.js' %}"></script>
+<!-- Main Script -->
+<script src="{% static 'assets/js/main.js' %}"></script>
+
+<!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'assets/lib/wow/wow.min.js' %}"></script>
+    <script src="{% static 'assets/lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'assets/lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'assets/lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    {% comment %} <script src="{% static 'assets/js/main.js' %}"></script> {% endcomment %}
+
+    <!-- Your custom JS script -->
+    {% comment %} <script>
+        $(document).ready(function () {
+            $(document).on('click', function (event) {
+                var clickOver = $(event.target);
+                var _opened = $(".navbar-collapse").hasClass("show");
+                var isNavbarItem = clickOver.closest('.navbar-nav').length > 0;
+
+                if (_opened === true && !clickOver.hasClass("navbar-toggler") && !isNavbarItem) {
+                    $(".navbar-toggler").click();
+                }
+            });
+        });
+    </script> {% endcomment %}
+    {% block custom_js %}
+    {% endblock custom_js %}
+</body>
+ 

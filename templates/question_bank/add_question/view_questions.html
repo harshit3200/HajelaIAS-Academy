@@ -1,0 +1,569 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block title %}View Your Questions{% endblock %}
+
+{% block content %}
+<style>
+  .area-badge:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+  transition: 0.2s;
+}
+
+.hierarchy-badge {
+  color: #000000ff;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 6px;
+  margin-right: 4px;
+  margin-bottom: 3px;
+  display: inline-block;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  transition: 0.25s ease;
+}
+.hierarchy-badge:hover {
+  transform: scale(1.07);
+  opacity: 0.9;
+}
+
+.exam-badge {
+  background-color: #212529;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 6px;
+  margin-right: 5px;
+}
+
+
+</style>
+<div class="container py-5">
+    <h2 class="text-center mb-5"> Questions Bank</h2>
+    <form method="get" class="mb-5">
+      <div class="row g-3">
+
+        <!-- Source -->
+        <div class="col-md-2">
+          <label for="question_source" class="form-label">Source</label>
+          <select name="question_source" id="question_source" class="form-select">
+            <option value="">All</option>
+            {% for source in QUESTION_SOURCES %}
+              <option value="{{ source.0 }}" {% if request.GET.question_source == source.0 %}selected{% endif %}>
+                {{ source.1 }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Question Type -->
+        <div class="col-md-2">
+          <label for="question_type" class="form-label">Question Type</label>
+          <select name="question_type" id="question_type" class="form-select">
+            <option value="">All</option>
+            {% for qtype in QUESTION_TYPES %}
+              <option value="{{ qtype.0 }}" {% if request.GET.question_type == qtype.0 %}selected{% endif %}>
+                {{ qtype.1 }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Area (ManyToMany) -->
+        <div class="col-md-2">
+          <label for="area_name" class="form-label">Area</label>
+          <select name="area_name" id="area_name" class="form-select">
+            <option value="">All</option>
+            {% for area in areas %}
+              <option value="{{ area.pk }}" {% if request.GET.area_name == area.pk|stringformat:"s" %}selected{% endif %}>
+                {{ area.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Section (ManyToMany) -->
+        <div class="col-md-2">
+          <label for="section_name" class="form-label">Section</label>
+          <select name="section_name" id="section_name" class="form-select">
+            <option value="">All</option>
+            {% for section in sections %}
+              <option value="{{ section.pk }}" {% if request.GET.section_name == section.pk|stringformat:"s" %}selected{% endif %}>
+                {{ section.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Part (ManyToMany) -->
+        <div class="col-md-2">
+          <label for="part_name" class="form-label">Part</label>
+          <select name="part_name" id="part_name" class="form-select">
+            <option value="">All</option>
+            {% for part in parts %}
+              <option value="{{ part.pk }}" {% if request.GET.part_name == part.pk|stringformat:"s" %}selected{% endif %}>
+                {{ part.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Chapter (ManyToMany) -->
+        <div class="col-md-2">
+          <label for="chapter_name" class="form-label">Chapter</label>
+          <select name="chapter_name" id="chapter_name" class="form-select">
+            <option value="">All</option>
+            {% for chapter in chapters %}
+              <option value="{{ chapter.pk }}" {% if request.GET.chapter_name == chapter.pk|stringformat:"s" %}selected{% endif %}>
+                {{ chapter.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Topic (ManyToMany) -->
+        <div class="col-md-2">
+          <label for="topic_name" class="form-label">Topic</label>
+          <select name="topic_name" id="topic_name" class="form-select">
+            <option value="">All</option>
+            {% for topic in topics %}
+              <option value="{{ topic.pk }}" {% if request.GET.topic_name == topic.pk|stringformat:"s" %}selected{% endif %}>
+                {{ topic.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Subtopic (ManyToMany) -->
+        <div class="col-md-2">
+          <label for="subtopic_name" class="form-label">Sub-topic</label>
+          <select name="subtopic_name" id="subtopic_name" class="form-select">
+            <option value="">All</option>
+            {% for subtopic in subtopics %}
+              <option value="{{ subtopic.pk }}" {% if request.GET.subtopic_name == subtopic.pk|stringformat:"s" %}selected{% endif %}>
+                {{ subtopic.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Submit -->
+        <div class="col-md-2 align-self-end">
+          <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+        </div>
+
+        <!-- ✅ Clear Filters -->
+        <div class="col-md-2 align-self-end">
+          <a href="{% url 'view_questions' %}" class="btn btn-outline-secondary w-100">
+            Clear Filters
+          </a>
+        </div>
+
+      </div>
+    </form>
+
+
+
+
+    {% if grouped_questions %}
+    <div class="row">
+        {% for base_id, pair in grouped_questions.items %}
+        <div class="row mb-4">
+
+            <!-- English Column -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-light fw-bold">
+                        English — Question {% if pair.english %}{{ pair.english.question_number }}{% else %}Not Uploaded{% endif %}
+                        <p>Type Of Question --> {{ pair.english.question_sub_type }}</p>
+                    </div>
+                    <div class="card-body">
+                        {% if pair.english %}
+                            {% if pair.english.question_sub_type in 'simple_type true_and_false_type fill_in_the_blank_type' %}
+                                <p>{{ pair.english.question_part }}</p>
+                            {% elif pair.english.question_sub_type == 'r_and_a_type' %}
+                                <p>{{ pair.english.question_part_first }}</p>
+                                <p style="color: #ea5323;">Assertion - </p>
+                                <p>{{ pair.english.assertion }}</p>
+                                <p style="color: rgb(0 63 137);">Reason -</p>
+                                <p>{{ pair.english.reason }}</p>
+                            {% elif pair.english.question_sub_type == 'list_type_1' %}
+                                <p><strong>{{ pair.english.question_part_first|default:"-" }}</strong></p>
+                                <ol style="list-style: none; padding-left: 0;">
+                                  {% for item in pair.english.list_1_items %}
+                                      <li style="margin-bottom: 6px;">
+                                          <strong>{{ forloop.counter }}.</strong> {{ item }}
+                                      </li>
+                                  {% endfor %}
+                              </ol>
+
+                                <p><strong>{{ pair.english.question_part_third|default:"-" }}</strong></p>
+
+                            {% load custom_tags %}
+
+{% elif pair.english.question_sub_type == 'list_type_2' %}
+    <p><strong>{{ pair.english.question_part_first|default:"-" }}</strong></p>
+
+    {% with letters="A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z"|split:"," %}
+    <table class="table table-bordered align-middle" style="width:100%; text-align:left;">
+        <thead class="table-light">
+            <tr>
+                <th>{{ pair.english.list_1_name|default:"List-I" }}</th>
+                <th>{{ pair.english.list_2_name|default:"List-II" }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="vertical-align: top;">
+                    <ul style="list-style: none; padding-left: 0; margin: 0;">
+                        {% for item in pair.english.list_1_items %}
+                            <li style="margin-bottom: 6px;">
+                                ({{ forloop.counter|to_letter }}). {{ item }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td style="vertical-align: top;">
+                    <ul style="list-style: none; padding-left: 0; margin: 0;">
+                        {% for item in pair.english.list_2_items %}
+                            <li style="margin-bottom: 6px;">
+                                ({{ forloop.counter }}). {{ item }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    {% endwith %}
+
+
+                            {% elif pair.english.question_sub_type == 'statement_type' %}
+        <p><strong>{{ pair.english.question_part_first|default:"-" }}</strong></p>
+        <table class="table table-bordered">
+            <thead class="table-light">
+                {% comment %} <tr><th style="width:45%">Statement</th><th style="width:10%" class="text-center">:</th><th style="width:45%">List-II</th></tr> {% endcomment %}
+            </thead>
+            <tbody style="width:45%">
+                {% with s1=pair.english.stmt_line_row1 l1=pair.english.list_2_row1 %}{% if s1 or l1 %}<tr><td>{{ s1|default:"-" }}</td><td class="text-center">:</td><td>{{ l1|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s2=pair.english.stmt_line_row2 l2=pair.english.list_2_row2 %}{% if s2 or l2 %}<tr><td>{{ s2|default:"-" }}</td><td class="text-center">:</td><td>{{ l2|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s3=pair.english.stmt_line_row3 l3=pair.english.list_2_row3 %}{% if s3 or l3 %}<tr><td>{{ s3|default:"-" }}</td><td class="text-center">:</td><td>{{ l3|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s4=pair.english.stmt_line_row4 l4=pair.english.list_2_row4 %}{% if s4 or l4 %}<tr><td>{{ s4|default:"-" }}</td><td class="text-center">:</td><td>{{ l4|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s5=pair.english.stmt_line_row5 l5=pair.english.list_2_row5 %}{% if s5 or l5 %}<tr><td>{{ s5|default:"-" }}</td><td class="text-center">:</td><td>{{ l5|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s6=pair.english.stmt_line_row6 l6=pair.english.list_2_row6 %}{% if s6 or l6 %}<tr><td>{{ s6|default:"-" }}</td><td class="text-center">:</td><td>{{ l6|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s7=pair.english.stmt_line_row7 l7=pair.english.list_2_row7 %}{% if s7 or l7 %}<tr><td>{{ s7|default:"-" }}</td><td class="text-center">:</td><td>{{ l7|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s8=pair.english.stmt_line_row8 l8=pair.english.list_2_row8 %}{% if s8 or l8 %}<tr><td>{{ s8|default:"-" }}</td><td class="text-center">:</td><td>{{ l8|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s9=pair.english.stmt_line_row9 l9=pair.english.list_2_row9 %}{% if s9 or l9 %}<tr><td>{{ s9|default:"-" }}</td><td class="text-center">:</td><td>{{ l9|default:"-" }}</td></tr>{% endif %}{% endwith %}
+            </tbody>
+        </table>
+        <p><strong>{{ pair.english.question_part_third|default:"-" }}</strong></p>
+    {% endif %}
+
+    <p>(a) {{ pair.english.answer_option_a }}</p>
+    <p>(b) {{ pair.english.answer_option_b }}</p>
+    <p>(c) {{ pair.english.answer_option_c }}</p>
+    <p>(d) {{ pair.english.answer_option_d }}</p>
+    <hr>
+    <p><strong>Correct Answer:</strong> {{ pair.english.correct_answer_choice }}</p>
+    <p><strong>Solution:</strong> {{ pair.english.correct_answer_description }}</p>
+{% else %}
+    <p class="text-danger">English version not uploaded.</p>
+{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hindi Column -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-light fw-bold">
+                        Hindi — Question {% if pair.hindi %}{{ pair.hindi.question_number }}{% else %}Not Uploaded{% endif %}
+                        <p>Type Of Question --> {{ pair.hindi.question_sub_type }}</p>
+                    </div>
+                    <div class="card-body">
+                        {% if pair.hindi %}
+                            {% if pair.hindi.question_sub_type in 'simple_type true_and_false_type fill_in_the_blank_type' %}
+                                <p>{{ pair.hindi.question_part_first_hi|default:"-" }}</p>
+                                
+                            {% elif pair.hindi.question_sub_type == 'r_and_a_type' %}
+                                <p>{{ pair.hindi.question_part_first_hi|default:"-" }}</p>
+                                <p style="color: #ea5323;">Assertion -</p>
+                                <p>{{ pair.hindi.assertion_hi|default:"-" }}</p>
+                                <p style="color: rgb(0 63 137);">Reason -</p>
+                                <p>{{ pair.hindi.reason_hi|default:"-" }}</p>
+
+                            {% elif pair.hindi.question_sub_type == 'list_type_1' %}
+                            <p><strong>{{ pair.hindi.question_part_first_hi|default:"-" }}</strong></p>
+                            <ol>
+                                {% for item in pair.hindi.list_1_items_hi %}
+                                    <li>{{ item }}</li>
+                                {% endfor %}
+                            </ol>
+                            <p><strong>{{ pair.hindi.question_part_third_hi|default:"-" }}</strong></p>
+
+                            {% elif pair.hindi.question_sub_type == 'list_type_2' %}
+                                <p>{{ pair.hindi.question_part_first_hi|default:"-" }}</p>
+                                <table class="table">
+                                    <thead><tr><th>List-I (हिंदी)</th><th>List-II (हिंदी)</th></tr></thead>
+                                    <tbody><tr>
+                                        <td>
+                                            <ol>{% for item in pair.hindi|get_list_items_hi:"list_1" %}<li>{{ item }}</li>{% endfor %}</ol>
+                                        </td>
+                                        <td>
+                                            <ol>{% for item in pair.hindi|get_list_items_hi:"list_2" %}<li>{{ item }}</li>{% endfor %}</ol>
+                                        </td>
+                                    </tr></tbody>
+                                </table>
+                            {% elif pair.hindi.question_sub_type == 'statement_type' %}
+        <p><strong>{{ pair.hindi.question_part_first_hi|default:"-" }}</strong></p>
+        <table class="table table-bordered">
+            <thead class="table-light">
+                {% comment %} <tr><th style="width:45%">वक्तव्य</th><th style="width:10%" class="text-center">:</th><th style="width:45%">List-II</th></tr> {% endcomment %}
+            </thead>
+            <tbody style="width:45%">
+                {% with s1=pair.hindi.stmt_line_row1_hi l1=pair.hindi.list_2_row1_hi %}{% if s1 or l1 %}<tr><td>{{ s1|default:"-" }}</td><td class="text-center">:</td><td>{{ l1|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s2=pair.hindi.stmt_line_row2_hi l2=pair.hindi.list_2_row2_hi %}{% if s2 or l2 %}<tr><td>{{ s2|default:"-" }}</td><td class="text-center">:</td><td>{{ l2|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s3=pair.hindi.stmt_line_row3_hi l3=pair.hindi.list_2_row3_hi %}{% if s3 or l3 %}<tr><td>{{ s3|default:"-" }}</td><td class="text-center">:</td><td>{{ l3|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s4=pair.hindi.stmt_line_row4_hi l4=pair.hindi.list_2_row4_hi %}{% if s4 or l4 %}<tr><td>{{ s4|default:"-" }}</td><td class="text-center">:</td><td>{{ l4|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s5=pair.hindi.stmt_line_row5_hi l5=pair.hindi.list_2_row5_hi %}{% if s5 or l5 %}<tr><td>{{ s5|default:"-" }}</td><td class="text-center">:</td><td>{{ l5|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s6=pair.hindi.stmt_line_row6_hi l6=pair.hindi.list_2_row6_hi %}{% if s6 or l6 %}<tr><td>{{ s6|default:"-" }}</td><td class="text-center">:</td><td>{{ l6|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s7=pair.hindi.stmt_line_row7_hi l7=pair.hindi.list_2_row7_hi %}{% if s7 or l7 %}<tr><td>{{ s7|default:"-" }}</td><td class="text-center">:</td><td>{{ l7|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s8=pair.hindi.stmt_line_row8_hi l8=pair.hindi.list_2_row8_hi %}{% if s8 or l8 %}<tr><td>{{ s8|default:"-" }}</td><td class="text-center">:</td><td>{{ l8|default:"-" }}</td></tr>{% endif %}{% endwith %}
+                {% with s9=pair.hindi.stmt_line_row9_hi l9=pair.hindi.list_2_row9_hi %}{% if s9 or l9 %}<tr><td>{{ s9|default:"-" }}</td><td class="text-center">:</td><td>{{ l9|default:"-" }}</td></tr>{% endif %}{% endwith %}
+            </tbody>
+        </table>
+        <p><strong>{{ pair.hindi.question_part_third_hi|default:"-" }}</strong></p>
+    {% endif %}
+
+    <p>(a) {{ pair.hindi.answer_option_a_hi }}</p>
+    <p>(b) {{ pair.hindi.answer_option_b_hi }}</p>
+    <p>(c) {{ pair.hindi.answer_option_c_hi }}</p>
+    <p>(d) {{ pair.hindi.answer_option_d_hi }}</p>
+    <hr>
+    <p><strong>Correct Answer:</strong> {{ pair.hindi.correct_answer_choice }}</p>
+    <p><strong>answer_description:</strong> {{ pair.hindi.correct_answer_description_hi|default:"-" }}</p>
+{% else %}
+    <p class="text-danger">Hindi version not uploaded.</p>
+{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ✅ Common Meta Information Card -->
+            <div class="col-md-12 mt-3">
+                <div class="card">
+                    <div class="card-body row">
+                        <div class="col-md-6">
+    <p><strong>Marks:</strong> {{ pair.english.marks }}</p>
+    <p><strong>Negative Marks:</strong> {{ pair.english.negative_marks }}</p>
+    <p><strong>Degree of Difficulty:</strong> {{ pair.english.degree_of_difficulty }}</p>
+    <p><strong>Elimination Tactics Degree:</strong> {{ pair.english.elim_tactics_degree }}</p>
+    <p><strong>Current Relevance:</strong> {{ pair.english.current_relevance }}</p>
+    <p><strong>Current Relevance Topic Explanation:</strong> {{ pair.english.current_relevance_topic }}</p>
+    <p><strong>Evergreen Index:</strong> {{ pair.english.evergreen_index }}</p>
+
+    <!-- ✅ Question Source -->
+    <p><strong>Question Source:</strong> {{ pair.english.type_of_question }} ({{ pair.english.get_type_of_question_display }})</p>
+    <p><strong>Exam Year:</strong> {{ pair.english.exam_year|default:"-" }}</p>
+
+    <!-- ✅ Keywords -->
+    <p><strong>Keywords:</strong> 
+        {% if pair.english.key_words %}
+            {{ pair.english.key_words }}
+        {% else %}
+            <span class="text-muted">-</span>
+        {% endif %}
+    </p>
+
+    <p><strong>Created At:</strong> {{ pair.english.created_at|date:"Y-m-d H:i" }}</p>
+    <p><strong>Created By:</strong> {{ pair.english.created_by }}</p>
+</div>
+
+
+<div class="col-md-6">
+
+  <!-- 🌈 Area Name(s) with color -->
+  <p><strong>Area Name(s):</strong>
+    {% for area in pair.english.area_name.all %}
+      <span class="badge hierarchy-badge"
+            style="background-color: {{ area.area_Colour_Hex|default:'#777' }};">
+        {{ area.name }}
+      </span>
+    {% empty %}
+      <span class="text-muted">—</span>
+    {% endfor %}
+  </p>
+
+  <!-- 🧩 Section Name(s) with parent Area color -->
+  <p><strong>Section Name(s):</strong>
+    {% for section in pair.english.section_name.all %}
+      {% with clr=section.area.area_Colour_Hex|default:'#777' %}
+        <span class="badge hierarchy-badge" style="background-color: {{ clr }};">
+          {{ section.name }}
+        </span>
+      {% endwith %}
+    {% empty %}
+      <span class="text-muted">—</span>
+    {% endfor %}
+  </p>
+
+  <!-- 🧱 Part Name(s) with parent Area color -->
+  <p><strong>Part Name(s):</strong>
+    {% for part in pair.english.part_name.all %}
+      {% with clr=part.section.area.area_Colour_Hex|default:'#777' %}
+        <span class="badge hierarchy-badge" style="background-color: {{ clr }};">
+          {{ part.name }}
+        </span>
+      {% endwith %}
+    {% empty %}
+      <span class="text-muted">—</span>
+    {% endfor %}
+  </p>
+
+  <!-- 📘 Chapter Name(s) with parent Area color -->
+  <p><strong>Chapter Name(s):</strong>
+    {% for chapter in pair.english.chapter_name.all %}
+      {% with clr=chapter.part.section.area.area_Colour_Hex|default:'#777' %}
+        <span class="badge hierarchy-badge" style="background-color: {{ clr }};">
+          {{ chapter.name }}
+        </span>
+      {% endwith %}
+    {% empty %}
+      <span class="text-muted">—</span>
+    {% endfor %}
+  </p>
+
+  <!-- 🧭 Topic Name(s) with parent Area color -->
+  <p><strong>Topic Name(s):</strong>
+    {% for topic in pair.english.topic_name.all %}
+      {% with clr=topic.chapter.part.section.area.area_Colour_Hex|default:'#777' %}
+        <span class="badge hierarchy-badge" style="background-color: {{ clr }};">
+          {{ topic.name }}
+        </span>
+      {% endwith %}
+    {% empty %}
+      <span class="text-muted">—</span>
+    {% endfor %}
+  </p>
+
+  <!-- 🧩 Subtopic Name(s) with parent Area color -->
+  <p><strong>Subtopic Name(s):</strong>
+    {% for subtopic in pair.english.subtopic_name.all %}
+      {% with clr=subtopic.topic.chapter.part.section.area.area_Colour_Hex|default:'#777' %}
+        <span class="badge hierarchy-badge" style="background-color: {{ clr }};">
+          {{ subtopic.name }}
+        </span>
+      {% endwith %}
+    {% empty %}
+      <span class="text-muted">—</span>
+    {% endfor %}
+  </p>
+
+  <!-- 🧾 Subtopic Short Codes -->
+  <p><strong>Subtopic Short Code(s):</strong>
+    {% for subtopic in pair.english.subtopic_name.all %}
+      {% with clr=subtopic.topic.chapter.part.section.area.area_Colour_Hex|default:'#777' %}
+        <span class="badge hierarchy-badge" style="background-color: {{ clr }};">
+          {{ subtopic.sub_topic_short_Code }}
+        </span>
+      {% endwith %}
+    {% empty %}
+      <span class="text-muted">—</span>
+    {% endfor %}
+  </p>
+
+  <!-- 🏛 Exam Names -->
+  <p><strong>Exam Name(s):</strong>
+    {% for exam in pair.english.exam_name.all %}
+      <span class="badge exam-badge">
+        {{ exam.name }}{% if exam.exam_code %} ({{ exam.exam_code }}){% endif %}
+      </span>
+    {% empty %}
+      <span class="text-muted">—</span>
+    {% endfor %}
+  </p>
+</div>
+
+
+
+                        <div class="col-12 text-end mt-3">
+  {# Safe URL capture to avoid NoReverseMatch if routes aren't defined yet #}
+  {% url 'edit-statement-type-question' pair.english.pk as edit_stmt_url %}
+  {% url 'delete-statement-type-question' pair.english.pk as del_stmt_url %}
+
+  {% if pair.english.question_sub_type == 'statement_type' %}
+      {% if edit_stmt_url %}
+        <a href="{{ edit_stmt_url }}" class="btn btn-primary me-2">✏️ Edit</a>
+      {% endif %}
+      {% if del_stmt_url %}
+        <a href="{{ del_stmt_url }}" class="btn btn-danger"
+           onclick="return confirm('Are you sure you want to delete this Statement Type Question?');">🗑️ Delete</a>
+      {% endif %}
+
+  {% elif pair.english.question_sub_type == 'simple_type' %}
+      <a href="{% url 'edit-simple-type-question' pair.english.pk %}" class="btn btn-primary me-2">✏️ Edit</a>
+      <a href="{% url 'delete-simple-type-question' pair.english.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this Simple Type Question?');">🗑️ Delete</a>
+
+  {% elif pair.english.question_sub_type == 'r_and_a_type' %}
+      <a href="{% url 'edit-r-and-a-type-question' pair.english.pk %}" class="btn btn-primary me-2">✏️ Edit</a>
+      <a href="{% url 'delete-r-and-a-type-question' pair.english.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this R and A Type Question?');">🗑️ Delete</a>
+
+  {% elif pair.english.question_sub_type == 'list_type_1' %}
+      <a href="{% url 'edit-list-type-1-question' pair.english.pk %}" class="btn btn-primary me-2">✏️ Edit</a>
+      <a href="{% url 'delete-list-type-1-question' pair.english.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this List Type 1 Question?');">🗑️ Delete</a>
+
+  {% elif pair.english.question_sub_type == 'list_type_2' %}
+      <a href="{% url 'edit-list-type-2-question' pair.english.pk %}" class="btn btn-primary me-2">✏️ Edit</a>
+      <a href="{% url 'delete-list-type-2-question' pair.english.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this List Type 2 Question?');">🗑️ Delete</a>
+
+  {% elif pair.english.question_sub_type == 'true_and_false_type' %}
+      <a href="{% url 'edit-true-and-false-type-question' pair.english.pk %}" class="btn btn-primary me-2">✏️ Edit</a>
+      <a href="{% url 'delete-true-and-false-type-question' pair.english.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this True/False Question?');">🗑️ Delete</a>
+
+  {% elif pair.english.question_sub_type == 'fill_in_the_blank_type' %}
+      <a href="{% url 'edit-fill-in-the-blank-question' pair.english.pk %}" class="btn btn-primary me-2">✏️ Edit</a>
+      <a href="{% url 'delete-fill-in-the-blank-question' pair.english.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this Fill in the Blank Question?');">🗑️ Delete</a>
+  {% endif %}
+</div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+<!-- Pagination Controls -->
+<div class="pagination mt-4">
+    <!-- First Page Link -->
+    <span class="page-link {% if not page_obj.has_previous %}disabled{% endif %}">
+        <a href="?page=1" class="page-link">First</a>
+    </span>
+    
+    <!-- Previous Page Link -->
+    <span class="page-link {% if not page_obj.has_previous %}disabled{% endif %}">
+        <a href="{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% else %}#{% endif %}" class="page-link">Previous</a>
+    </span>
+    
+    <!-- Page Number -->
+    <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    
+    <!-- Next Page Link -->
+    <span class="page-link {% if not page_obj.has_next %}disabled{% endif %}">
+        <a href="{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}{% else %}#{% endif %}" class="page-link">Next</a>
+    </span>
+    
+    <!-- Last Page Link -->
+    <span class="page-link {% if not page_obj.has_next %}disabled{% endif %}">
+        <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">Last</a>
+    </span>
+</div>
+
+
+
+    {% else %}
+    <p class="text-center">No questions available.</p>
+    {% endif %}
+</div>
+{% endblock %}

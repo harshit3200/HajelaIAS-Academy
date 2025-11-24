@@ -1,0 +1,48 @@
+{% load custom_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earlier Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid black;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Earlier Report (Generated on: {{ earlier_report_date }})</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Sr. No.</th>
+                <th>User Email</th>
+                <th>No. of Questions Uploaded</th>
+                <th>No. of Idioms/Phrases Uploaded</th>
+                <th>No. of Input Suggestions Uploaded</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user_data in earlier_questions %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ user_data.created_by__email }}</td>
+            <td>{{ user_data.total_questions }}</td>
+            <td>{{ earlier_idioms|get_user_data:user_data.created_by__email }}</td>
+            <td>{{ earlier_input_suggestions|get_user_data:user_data.created_by__email }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

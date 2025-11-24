@@ -1,0 +1,1012 @@
+@media screen and (max-width: 1600px) {
+    .btn-close {
+        right: -75px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .certificate-title {
+        font-size: 32px;
+    }
+
+    .certificate-title-box img {
+        width: 40px;
+    }
+
+    .course-review-title {
+        font-size: 30px;
+    }
+
+    .my-courses-title h2 {
+        font-size: 32px;
+        line-height: 45px;
+    }
+
+    .smc-title {
+        font-size: 26px;
+        line-height: 38px;
+    }
+
+    .dashboard-content-header-title h4 {
+        font-size: 24px;
+    }
+
+    .short-dec-title {
+        font-size: 30px;
+        line-height: 45px;
+    }
+
+    .course-short-desc p {
+        font-size: 12px;
+        line-height: 24px;
+    }
+
+    .course-short-desc img {
+        width: 18px;
+    }
+
+    .course-title {
+        font-size: 20px;
+        line-height: 30px;
+        min-height: 60px;
+    }
+
+    .product-details-title {
+        font-size: 32px;
+        line-height: 45px;
+    }
+}
+@media screen and (max-width: 1440px) {
+    .error-title {
+        font-size: 40px;
+        line-height: 56px;
+        margin-bottom: 30px;
+    }
+
+    .video-js {
+        height: 500px;
+    }
+
+    .playlist-child-videos {
+        max-height: 480px;
+    }
+
+    .sp-desc .sp-title {
+        font-weight: 600;
+        font-size: 16px;
+    }
+}
+@media screen and (max-width: 1400px) {
+    .form-top-box .form-name {
+        font-size: 30px;
+        margin-bottom: 8px;
+    }
+
+    .form-text {
+        font-size: 18px;
+    }
+
+    .forgot-pass {
+        font-size: 16px;
+    }
+
+    .form-control,
+    .form-select,
+    .chosen-choices {
+        font-size: 16px !important;
+    }
+
+    .form-bottom-box p {
+        font-size: 16px;
+        margin-top: 12px;
+    }
+
+    .error-text {
+        font-size: 22px;
+        line-height: 36px;
+        margin-bottom: 32px;
+    }
+
+    .teams-wrapper {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+@media screen and (max-width: 1366px) {
+    .duc-icon {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 24px;
+        font-size: 24px;
+    }
+
+    .instructor-dashboard-top-title {
+        font-size: 30px;
+    }
+
+    .product-details-title {
+        font-size: 28px;
+        line-height: 45px;
+    }
+
+    .pdc-top {
+        margin-bottom: 50px;
+    }
+
+    .pdcbw-text a {
+        font-size: 22px;
+    }
+
+    .pdc-offer-price {
+        font-size: 32px;
+    }
+
+    .duc-icon img {
+        width: 40px;
+    }
+
+    .duc-title {
+        font-size: 40px;
+        margin-bottom: 8px;
+    }
+
+    .duc-text {
+        font-size: 16px;
+        margin-bottom: 26px;
+    }
+
+    .delete-user-body {
+        padding: 60px;
+    }
+
+    .spb-balance {
+        font-size: 40px;
+        line-height: 56px;
+        margin-bottom: 12px;
+    }
+
+    .spb-title {
+        color: var(--Gray-colors-900, #0a033c);
+        margin-bottom: 20px;
+    }
+
+    .scai-left-box {
+        width: 250px;
+    }
+
+    .accordion-item:first-of-type .accordion-button {
+        border-radius: 12px;
+    }
+
+    .accordion-button {
+        font-size: 18px;
+        border-radius: 12px;
+        padding: 24px 40px;
+        -webkit-border-radius: 12px;
+        -moz-border-radius: 12px;
+        -ms-border-radius: 12px;
+        -o-border-radius: 12px;
+    }
+
+    .accordion-body {
+        font-size: 16px;
+        line-height: 28px;
+        border-bottom-left-radius: 12px !important;
+        border-bottom-right-radius: 12px !important;
+        padding: 24px 40px;
+    }
+}
+@media screen and (max-width: 1200px) {
+    .single-earning-content p {
+        font-size: 30px;
+        line-height: 48px;
+    }
+
+    .single-my-courses {
+        gap: 16px;
+        flex-direction: column;
+        align-items: self-start;
+    }
+
+    .smc-course {
+        gap: 16px;
+        flex-direction: column;
+        align-items: self-start;
+        width: 100%;
+    }
+
+    .smc-img {
+        width: 100%;
+        height: 250px;
+    }
+
+    .single-my-courses .ellipsis-btn {
+        display: none;
+    }
+
+    .approval-title {
+        font-size: 20px;
+        line-height: 30px;
+    }
+
+    .account-lock-top img {
+        width: 160px;
+        margin-bottom: 16px;
+    }
+
+    .preview-btn {
+        width: 50px;
+        height: 50px;
+    }
+
+    .preview-btn img {
+        width: 16px;
+    }
+}
+@media screen and (max-width: 1024px) {
+    .activity-top-title {
+        font-size: 24px;
+        margin-bottom: 16px;
+    }
+
+    .teams-wrapper {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .activity-person-demo {
+        width: 50px;
+        height: 50px;
+        font-size: 16px;
+    }
+
+    .single-activity-top,
+    .activity-content {
+        margin-bottom: 16px;
+    }
+}
+@media screen and (max-width: 992px) {
+    .hpi-img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .header-profile-info-top {
+        padding: 20px;
+    }
+
+    .hpi-name h5 {
+        font-size: 20px;
+        line-height: 30px;
+    }
+
+    .hpi-name p {
+        font-size: 16px;
+    }
+
+    .header-profile-info-bottom ul li a {
+        font-size: 16px;
+        line-height: 26px;
+        gap: 12px;
+    }
+
+    .header-profile-info-bottom ul li {
+        margin-bottom: 16px;
+    }
+
+    .header-logout-btn {
+        font-size: 16px;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .header-profile-info-bottom {
+        padding: 20px;
+    }
+
+    .header .dropdown-menu.show {
+        border-radius: 8px;
+    }
+
+    .sidebar {
+        position: absolute;
+        left: -100%;
+    }
+
+    .open-sidebar-btn-1 {
+        display: none;
+    }
+
+    .open-sidebar-btn-2 {
+        display: block;
+    }
+
+    .sidebar.active {
+        position: fixed;
+        left: 0;
+    }
+
+    .header-search-box {
+        display: none !important;
+    }
+
+    .close-btn-box {
+        display: flex;
+    }
+
+    .dashboard-content-header-title h4 {
+        font-size: 24px;
+        line-height: 36px;
+    }
+
+    .dashboard-content-header {
+        margin-bottom: 16px;
+    }
+
+    .form-control,
+    .form-select,
+    .chosen-choices {
+        font-size: 16px !important;
+        padding: 8px 12px !important;
+    }
+
+    .btn {
+        font-size: 16px !important;
+    }
+
+    .hrb-btn {
+        width: 45px;
+        height: 45px;
+    }
+
+    .hrb-btn img {
+        width: 20px;
+    }
+
+    .hp-dropdown {
+        font-size: 18px;
+    }
+
+    .hp-img {
+        width: 40px;
+        height: 40px;
+    }
+
+    td,
+    th {
+        padding: 16px 10px !important;
+    }
+
+    .single-notification-img {
+        width: 45px;
+        height: 45px;
+    }
+
+    .header-notification {
+        width: 340px;
+    }
+    .mark-as-read-btn {
+        font-size: 12px;
+        gap: 4px;
+    }
+
+    .hn-title span {
+        font-size: 8px;
+    }
+
+    .mark-as-read-btn img {
+        width: 16px;
+    }
+
+    .header .header-notification-dropdown {
+        left: unset;
+        right: 50%;
+        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        border-radius: 18px;
+        transform: translateX(50%);
+    }
+
+    .delete-user-body {
+        padding: 60px 30px;
+    }
+
+    .b-amount-left h2 {
+        font-size: 30px;
+        margin-bottom: 8px;
+    }
+
+    .withdraw-btn {
+        font-size: 16px;
+        padding: 18px 26px;
+    }
+}
+@media screen and (max-width: 768px) {
+    .btn-close {
+        right: 0;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .content {
+        width: auto;
+    }
+
+    .course-video {
+        border-radius: 8px;
+        background: #efebf5;
+        padding: 12px;
+        margin-bottom: 40px;
+    }
+
+    .my-courses-title h2 {
+        font-size: 28px;
+        line-height: 45px;
+    }
+
+    .short-dec-text {
+        font-size: 16px;
+        line-height: 28px;
+    }
+
+    .teams-wrapper {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .earning-analytics-chart {
+        height: 400px;
+    }
+
+    .single-earing-card {
+        padding: 24px 20px;
+    }
+
+    .single-earning-content h3 {
+        font-size: 14px;
+    }
+
+    .form-check-label {
+        font-size: 16px;
+    }
+
+    .add-new-cat-btn {
+        font-size: 16px;
+    }
+
+    .file-input-label {
+        padding: 8px;
+    }
+
+    .select-top-menu {
+        flex-direction: column;
+        align-items: self-start;
+        gap: 12px;
+    }
+
+    .input-group:not(.has-validation) > .dropdown-toggle:nth-last-child(n + 3),
+    .input-group:not(.has-validation)
+        > .form-floating:not(:last-child)
+        > .form-control,
+    .input-group:not(.has-validation)
+        > .form-floating:not(:last-child)
+        > .form-select,
+    .input-group:not(.has-validation)
+        > :not(:last-child):not(.dropdown-toggle):not(.dropdown-menu):not(
+            .form-floating
+        ) {
+        display: none;
+    }
+
+    .form-text {
+        font-size: 16px;
+    }
+
+    .scb-content-box .form-check-label {
+        font-size: 16px;
+    }
+
+    .product-details-img img {
+        width: 100%;
+    }
+
+    .error-title {
+        font-size: 36px;
+        line-height: 50px;
+        margin-bottom: 20px;
+    }
+
+    .error-text {
+        font-size: 20px;
+        line-height: 30px;
+        margin-bottom: 24px;
+    }
+
+    .error-page-content {
+        margin-top: 60px;
+        padding-bottom: 30px;
+    }
+
+    .error-page {
+        padding-top: 80px;
+    }
+}
+@media screen and (max-width: 576px) {
+    td,
+    th {
+        padding: 12px 10px !important;
+    }
+
+    .course-review-title {
+        font-size: 26px;
+        margin-bottom: 16px;
+    }
+
+    .video-js {
+        height: 250px;
+    }
+
+    .playlist-child-videos {
+        max-height: 385px;
+    }
+
+    .playing-video-title {
+        font-size: 18px;
+        line-height: 26px;
+    }
+
+    .single-playlist {
+        gap: 12px;
+    }
+
+    .icr-top {
+        flex-direction: column;
+        align-items: self-start;
+        gap: 12px;
+    }
+
+    .single-overall-ratting-bottom .progress,
+    .progress-stacked {
+        --bs-progress-height: 6px;
+    }
+
+    .overall-ratting-top h2 {
+        font-size: 40px;
+    }
+
+    .instructor-dashboard-top-title {
+        font-size: 24px;
+        line-height: 36px;
+    }
+
+    .my-courses-top {
+        padding: 24px;
+        flex-direction: column;
+        gap: 12px;
+        align-items: self-start;
+    }
+
+    .smc-img {
+        height: 200px;
+    }
+
+    .smc-card {
+        border-radius: 6px;
+        padding: 16px;
+    }
+
+    .smcd-number {
+        font-size: 20px;
+        gap: 2px;
+    }
+
+    .smc-title {
+        font-size: 24px;
+        line-height: 38px;
+    }
+
+    .instructor-dashboard-top-box {
+        flex-direction: column;
+        align-items: self-start;
+        gap: 12px;
+    }
+
+    .history-table-top {
+        flex-direction: column;
+        align-items: self-start;
+        gap: 16px;
+    }
+
+    .single-course-approval {
+        flex-direction: column;
+        align-items: self-start;
+    }
+
+    .course-approval-left {
+        flex-direction: column;
+    }
+
+    .course-approval-img {
+        width: 100% !important;
+        height: 200px !important;
+    }
+
+    .course-approval-img img {
+        width: 100%;
+    }
+
+    .single-course-approval .btn-purple {
+        margin-bottom: 0;
+    }
+
+    .course-approval-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .spl-title {
+        font-size: 16px;
+    }
+
+    .product-details-title {
+        font-size: 26px;
+        line-height: 40px;
+    }
+
+    .pdc-top {
+        margin-bottom: 40px;
+    }
+
+    .splc-rating-num,
+    .splc-rating-person {
+        font-size: 16px;
+    }
+
+    .spl-rating li {
+        font-size: 14px;
+    }
+
+    .available-balance-bag {
+        width: 24px;
+    }
+
+    .profile-name {
+        font-size: 24px;
+    }
+
+    .profile-img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .profile-content {
+        bottom: -85px;
+    }
+
+    .balance-amount-box {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .pay-left {
+        flex-direction: column;
+    }
+
+    .checkout-box {
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .short-dec-title {
+        font-size: 24px;
+        line-height: 45px;
+        margin-bottom: 12px !important;
+    }
+
+    .user-left h3 {
+        font-size: 18px;
+        line-height: 24px;
+    }
+
+    .product-details-tab .nav-tabs .nav-link {
+        padding: 0 16px 12px 16px;
+    }
+
+    .certificate-title {
+        font-size: 22px;
+        line-height: 34px;
+    }
+
+    .certificate-title-box {
+        flex-direction: column;
+        align-items: self-start;
+    }
+
+    .profile-name-box {
+        gap: 12px;
+        flex-direction: column;
+    }
+
+    .pn-button-box {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .spl-price {
+        font-size: 20px;
+    }
+
+    .teams-wrapper {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    .spl-rating-box {
+        gap: 8px;
+    }
+
+    .accordion-button,
+    .accordion-body {
+        padding: 16px 20px;
+    }
+
+    .pricing-top img {
+        margin-bottom: 16px;
+        width: 55px;
+    }
+
+    .single-pricing hr {
+        margin: 0;
+    }
+
+    .error-title {
+        font-size: 30px;
+        line-height: 40px;
+        margin-bottom: 16px;
+    }
+
+    .account-lock {
+        padding: 40px;
+    }
+
+    .error-text {
+        font-size: 18px;
+        line-height: 30px;
+        margin-bottom: 24px;
+    }
+
+    .spb-balance {
+        font-size: 36px;
+    }
+
+    .single-card-add-info {
+        gap: 12px;
+        flex-direction: column;
+    }
+
+    .scai-input-wrapper {
+        width: 100% !important;
+    }
+
+    .spb-text {
+        margin-bottom: 30px;
+    }
+
+    .payment-method-box {
+        border-radius: 6px;
+        height: 60px;
+        justify-content: center;
+        -webkit-border-radius: 6px;
+        -moz-border-radius: 6px;
+        -ms-border-radius: 6px;
+        -o-border-radius: 6px;
+    }
+
+    .sac-right {
+        flex-direction: column;
+    }
+
+    .header {
+        padding: 16px;
+    }
+
+    .duc-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 10px;
+    }
+
+    .duc-icon img {
+        width: 32px;
+    }
+
+    .duc-title {
+        font-size: 36px;
+        margin-bottom: 8px;
+    }
+
+    .user-profile-form {
+        padding: 40px;
+        border-radius: 20px;
+        -webkit-border-radius: 20px;
+        -moz-border-radius: 20px;
+        -ms-border-radius: 20px;
+        -o-border-radius: 20px;
+    }
+
+    .form-top-box .form-name {
+        font-size: 26px;
+        margin-bottom: 8px;
+        line-height: 36px;
+    }
+
+    .dashboard-content-header-title h4 {
+        font-size: 22px;
+        line-height: 30px;
+    }
+
+    .pagination-item {
+        width: 35px;
+        height: 35px;
+        border-radius: 6px;
+        font-size: 12px;
+    }
+
+    .add-event-bottom-box {
+        flex-direction: column;
+        align-items: self-start;
+        gap: 12px;
+    }
+
+    .pagination-list {
+        gap: 8px;
+    }
+
+    .form-control,
+    .form-select,
+    .chosen-choices {
+        border-radius: 6px;
+        -webkit-border-radius: 6px;
+        -moz-border-radius: 6px;
+        -ms-border-radius: 6px;
+        -o-border-radius: 6px;
+    }
+
+    .scb-title {
+        font-size: 16px;
+    }
+
+    .scb-title-box {
+        min-width: 90px;
+    }
+
+    .single-config-box {
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px !important;
+    }
+
+    .scb-content-box .form-label,
+    .scb-content-box .form-label span {
+        font-size: 12px;
+    }
+
+    .scb-content-image {
+        width: 70px;
+    }
+
+    .form-check.mb-4 {
+        margin-bottom: 12px !important;
+    }
+
+    .sto-title {
+        font-size: 16px;
+    }
+
+    .courses-breadcrumb-top {
+        justify-content: space-between;
+        align-items: self-start;
+        flex-direction: column;
+    }
+
+    .cal-width {
+        width: 100%;
+    }
+
+    .srr-name {
+        font-size: 12px;
+        line-height: 20px;
+    }
+
+    .srr-date {
+        font-size: 12px;
+        line-height: 20px;
+    }
+
+    .srr-price {
+        font-size: 16px;
+    }
+
+    .profile-name {
+        font-size: 22px;
+    }
+
+    .single-review-ratting {
+        gap: 6px;
+    }
+
+    .single-review-text {
+        font-size: 16px;
+        line-height: 28px;
+        margin-bottom: 24px;
+    }
+}
+@media screen and (max-width: 480px) {
+    .btn,
+    .btn-orange-lg,
+    .attachment-box label,
+    .btn-outline-gray,
+    .btn-purple,
+    .btn-orange {
+        font-size: 14px !important;
+        padding: 12px 20px !important;
+    }
+
+    .single-course-approval .btn-orange,
+    .single-course-approval .btn-purple {
+        padding: 12px 20px !important;
+        font-size: 14px;
+        width: auto;
+        border-radius: 6px;
+        -webkit-border-radius: 6px;
+        -moz-border-radius: 6px;
+        -ms-border-radius: 6px;
+        -o-border-radius: 6px;
+    }
+
+    .activity-text {
+        font-size: 14px;
+        line-height: 24px;
+    }
+
+    .mbl-flex {
+        flex-direction: column !important;
+        align-items: self-start !important;
+    }
+
+    .sac-left {
+        min-width: 25px;
+    }
+    .scb-content-box .form-label,
+    .scb-content-box .form-label span {
+        display: none;
+    }
+
+    .file-input-label {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .hrb-btn {
+        display: none;
+    }
+
+    .header-profile {
+        gap: 4px;
+    }
+
+    .header {
+        padding: 12px;
+    }
+
+    .dashboard-content-header {
+        align-items: start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .pagination-box {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+@media screen and (max-width: 360px) {
+}

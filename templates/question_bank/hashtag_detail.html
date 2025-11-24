@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}  {# ✅ Loads your custom slugify filter! #}
+
+{% block title %}#{{ hashtag.name }} - Input Suggestions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center mb-5">
+    <h1>#{{ hashtag.name }}</h1>
+    <p class="lead">Showing all Input Suggestions tagged with #{{ hashtag.name }}.</p>
+  </div>
+
+  <!-- ✅ Input Suggestions Grid -->
+  <div class="row">
+    {% if suggestions %}
+      {% for question in suggestions %}
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="card h-100">
+            <!-- Card Image -->
+            {% if question.images.first %}
+              <img src="{{ question.images.first.image.url }}" class="card-img-top" alt="Image">
+            {% else %}
+              <img src="{% static 'assets/img/thumbnail.jpeg' %}" class="card-img-top" alt="Default Image" height="200px">
+            {% endif %}
+
+            <div class="card-body">
+              <h5 class="card-title">{{ question.brief_description|safe|truncatewords:20 }}</h5>
+              <p class="card-text">
+                <strong>Approval Status:</strong>
+                {% if question.approval_status == 'approved' %}
+                  <span class="badge bg-success">{{ question.approval_status_display }}</span>
+                {% else %}
+                  <span class="badge bg-danger">{{ question.approval_status_display }}</span>
+                {% endif %}
+                <hr>
+                {% if question.current_relevance %}
+                  <p class="text-muted">
+                    <strong>Current Relevance:</strong>
+                    {% if question.current_relevance == '0' %} Not Relevant
+                    {% elif question.current_relevance == '1' %} Moderately Relevant
+                    {% elif question.current_relevance == '2' %} Very Relevant
+                    {% else %} {{ question.current_relevance }}
+                    {% endif %}
+                  </p>
+                {% endif %}
+
+                {% if question.current_relevance_topic %}
+                  <p class="text-muted">
+                    <strong>Relevance Topic:</strong> {{ question.current_relevance_topic }}
+                  </p>
+                {% endif %}
+
+                <hr>
+                <strong>Area:</strong>
+                {% if question.area_name.exists %}
+                  {{ question.area_name.all|join:", " }}
+                {% else %}
+                  No Area specified.
+                {% endif %}
+                <br>
+
+                <strong>Part:</strong>
+                {% if question.part_name.exists %}
+                  {{ question.part_name.all|join:", " }}
+                {% else %}
+                  No Part specified.
+                {% endif %}
+                <br>
+
+                <strong>Topic:</strong>
+                {% if question.topic_name.exists %}
+                  {{ question.topic_name.all|join:", " }}
+                {% else %}
+                  No Topic specified.
+                {% endif %}
+                <br>
+
+                <strong>Sub-Topic:</strong>
+                {% if question.subtopic_name.exists %}
+                  {{ question.subtopic_name.all|join:", " }}
+                {% else %}
+                  No Sub-Topic specified.
+                {% endif %}
+                <br>
+
+                <!-- ✅ Show hashtags (slugify to avoid spaces) -->
+                <!-- ✅ Show hashtags with safe URL fallback -->
+{% if question.hashtags.exists %}
+  <p>
+    {% for tag in question.hashtags.all %}
+      <strong>
+        {% if tag.hashtags_SI_Number %}
+          <a href="{% url 'hashtag_detail' slug=tag.hashtags_SI_Number %}">
+            #{{ tag.name }}
+          </a>
+        {% else %}
+          <span class="badge bg-secondary">#{{ tag.name }}</span>
+        {% endif %}
+      </strong>
+    {% endfor %}
+  </p>
+{% endif %}
+
+
+                <small>{{ question.other_text|truncatewords:10 }}</small>
+              </p>
+            </div>
+
+            <div class="card-footer">
+              <a href="{% url 'view-input-suggestion' question.id %}" class="btn btn-primary">Read More</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No suggestions found for this hashtag.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

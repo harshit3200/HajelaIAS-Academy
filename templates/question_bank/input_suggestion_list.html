@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}  {# ✅ Load your custom_tags to use slugify_filter #}
+
+{% block title %}All Input Suggestions - Hajela's IAS Academy (HIA){% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center mb-5">
+    <h1>All Input Suggestions</h1>
+    <p class="lead">Explore all input suggestions and use filters to narrow your search.</p>
+  </div>
+
+<form method="GET" class="row g-3 mb-5">
+
+  <!-- ✅ Area Filter -->
+  <div class="col-md-2">
+    <label for="area_name" class="form-label">Area</label>
+    <select name="area_name" id="area_name" class="form-select">
+      <option value="">All Areas</option>
+      {% for area in areas %}
+        <option value="{{ area.area_SI_Code }}"
+          {% if request.GET.area_name == area.area_SI_Code|stringformat:"s" %}selected{% endif %}>
+          {{ area.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- ✅ Part Filter -->
+  <div class="col-md-2">
+    <label for="part_name" class="form-label">Part</label>
+    <select name="part_name" id="part_name" class="form-select">
+      <option value="">All Parts</option>
+      {% for part in parts %}
+        <option value="{{ part.part_serial }}"
+          {% if request.GET.part_name == part.part_serial|stringformat:"s" %}selected{% endif %}>
+          {{ part.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- ✅ Chapter Filter -->
+  <div class="col-md-2">
+    <label for="chapter_name" class="form-label">Chapter</label>
+    <select name="chapter_name" id="chapter_name" class="form-select">
+      <option value="">All Chapters</option>
+      {% for chapter in chapters %}
+        <option value="{{ chapter.chapter_number }}"
+          {% if request.GET.chapter_name == chapter.chapter_number|stringformat:"s" %}selected{% endif %}>
+          {{ chapter.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- ✅ Topic Filter -->
+  <div class="col-md-2">
+    <label for="topic_name" class="form-label">Topic</label>
+    <select name="topic_name" id="topic_name" class="form-select">
+      <option value="">All Topics</option>
+      {% for topic in topics %}
+        <option value="{{ topic.topic_SI_number }}"
+          {% if request.GET.topic_name == topic.topic_SI_number|stringformat:"s" %}selected{% endif %}>
+          {{ topic.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- ✅ Subtopic Filter -->
+  <div class="col-md-2">
+    <label for="subtopic_name" class="form-label">Sub-Topic</label>
+    <select name="subtopic_name" id="subtopic_name" class="form-select">
+      <option value="">All Sub-Topics</option>
+      {% for subtopic in subtopics %}
+        <option value="{{ subtopic.sub_topic_SI_Number }}"
+          {% if request.GET.subtopic_name == subtopic.sub_topic_SI_Number|stringformat:"s" %}selected{% endif %}>
+          {{ subtopic.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- ✅ Hashtag Filter -->
+  <div class="col-md-2">
+    <label for="hashtag" class="form-label">#Tag</label>
+    <select name="hashtag" id="hashtag" class="form-select">
+      <option value="">All #Tags</option>
+      {% for hashtag in hashtags %}
+        <option value="{{ hashtag.hashtags_SI_Number }}"
+          {% if request.GET.hashtag == hashtag.hashtags_SI_Number|stringformat:"s" %}selected{% endif %}>
+          #{{ hashtag.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- ✅ Submit -->
+  <div class="col-md-2 align-self-end">
+    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+  </div>
+
+  <!-- ✅ Clear Filters -->
+  <div class="col-md-2 align-self-end">
+    <a href="{% url 'input-suggestion-list' %}" class="btn btn-outline-secondary w-100">
+      Clear Filters
+    </a>
+  </div>
+
+</form>
+
+
+
+  <!-- ✅ Input Suggestions Grid -->
+  <div class="row">
+    {% for question in questions %}
+      <div class="col-lg-4 col-md-6 mb-4" style="height: 500px;">
+        <div class="card h-100">
+          <!-- Card Image -->
+          {% if question.images.first %}
+            <img src="{{ question.images.first.image.url }}" class="card-img-top" alt="Image" height="200px">
+          {% else %}
+            <img src="{% static 'assets/img/thumbnail.jpeg' %}" class="card-img-top" alt="Default Image" height="200px">
+          {% endif %}
+
+          <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+  <h5 class="card-title">{{ question.brief_description|safe|truncatewords:20 }}</h5>
+  <p class="card-text">
+    <strong>Approval Status:</strong>
+    {% if question.approval_status == 'approved' %}
+      <span class="badge bg-success">{{ question.approval_status_display }}</span>
+    {% else %}
+      <span class="badge bg-danger">{{ question.approval_status_display }}</span>
+    {% endif %}
+    <hr>
+
+    {% if question.current_relevance %}
+      <p class="text-muted">
+        <strong>Current Relevance:</strong>
+        {% if question.current_relevance == '0' %} Not Relevant
+        {% elif question.current_relevance == '1' %} Moderately Relevant
+        {% elif question.current_relevance == '2' %} Very Relevant
+        {% else %} {{ question.current_relevance }}
+        {% endif %}
+      </p>
+    {% endif %}
+
+    {% if question.current_relevance_topic %}
+      <p class="text-muted">
+        <strong>Relevance Topic:</strong> {{ question.current_relevance_topic }}
+      </p>
+    {% endif %}
+    <hr>
+
+    <strong>Area:</strong>
+    {% if question.area_name.exists %}
+      {{ question.area_name.all|join:", " }}
+    {% else %}
+      No Area specified.
+    {% endif %}
+    <br>
+
+    <strong>Part:</strong>
+    {% if question.part_name.exists %}
+      {{ question.part_name.all|join:", " }}
+    {% else %}
+      No Part specified.
+    {% endif %}
+    <br>
+
+    <strong>Topic:</strong>
+    {% if question.topic_name.exists %}
+      {{ question.topic_name.all|join:", " }}
+    {% else %}
+      No Topic specified.
+    {% endif %}
+    <br>
+
+    <strong>Sub-Topic:</strong>
+    {% if question.subtopic_name.exists %}
+      {{ question.subtopic_name.all|join:", " }}
+    {% else %}
+      No Sub-Topic specified.
+    {% endif %}
+    <br>
+
+    {% if question.hashtags.exists %}
+      <hr>
+      <div class="mt-2">
+        <strong>Hashtags:</strong><br>
+        <p class="text-muted">
+          {% for hashtag in question.hashtags.all %}
+            {% if hashtag.hashtags_SI_Number %}
+              <a href="{% url 'hashtag_detail' slug=hashtag.hashtags_SI_Number %}" class="badge bg-secondary text-decoration-none">
+                #{{ hashtag.name }}
+              </a>
+            {% else %}
+              <span class="badge bg-secondary text-decoration-none">
+                #{{ hashtag.name }}
+              </span>
+            {% endif %}
+          {% endfor %}
+        </p>
+      </div>
+    {% endif %}
+
+    <small>{{ question.other_text|truncatewords:10 }}</small>
+  </p>
+</div>
+
+
+          <div class="card-footer">
+            <a href="{% url 'view-input-suggestion' question.id %}" class="btn btn-primary">Read More</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No input suggestions found.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function(){
+  $('#area_name').change(function(){
+    var areaId = $(this).val();
+    $.ajax({
+      url: '{% url "get_parts_by_area" %}',
+      data: { 'area_ids[]': [areaId] },
+      success: function(data){
+        var partSelect = $('#part_name');
+        partSelect.empty().append('<option value="">All</option>');
+        $.each(data.parts, function(i, part){
+          partSelect.append('<option value="'+ part.part_serial +'">'+ part.name +'</option>');
+        });
+      }
+    });
+  });
+
+  $('#part_name').change(function(){
+    var partId = $(this).val();
+    $.ajax({
+      url: '{% url "get_chapters_list" %}',
+      data: { 'part_ids[]': [partId] },
+      success: function(data){
+        var chapterSelect = $('#chapter_name');
+        chapterSelect.empty().append('<option value="">All</option>');
+        $.each(data.chapters, function(i, chapter){
+          chapterSelect.append('<option value="'+ chapter.chapter_number +'">'+ chapter.name +'</option>');
+        });
+      }
+    });
+  });
+
+  $('#chapter_name').change(function(){
+    var chapterId = $(this).val();
+    $.ajax({
+      url: '{% url "get_topics_list" %}',
+      data: { 'chapter_ids[]': [chapterId] },
+      success: function(data){
+        var topicSelect = $('#topic_name');
+        topicSelect.empty().append('<option value="">All</option>');
+        $.each(data.topics, function(i, topic){
+          topicSelect.append('<option value="'+ topic.topic_SI_number +'">'+ topic.name +'</option>');
+        });
+      }
+    });
+  });
+
+  $('#topic_name').change(function(){
+    var topicId = $(this).val();
+    $.ajax({
+      url: '{% url "get_subtopics_list" %}',
+      data: { 'topic_ids[]': [topicId] },
+      success: function(data){
+        var subtopicSelect = $('#subtopic_name');
+        subtopicSelect.empty().append('<option value="">All</option>');
+        $.each(data.subtopics, function(i, subtopic){
+          subtopicSelect.append('<option value="'+ subtopic.sub_topic_SI_Number +'">'+ subtopic.name +'</option>');
+        });
+      }
+    });
+  });
+});
+</script>
+
+{% endblock %}

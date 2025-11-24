@@ -1,0 +1,944 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Add Question - Hajela's IAS Academy (HIA){% endblock %}
+
+{% block content %}
+    <!-- Header Start -->
+    <div class="container-fluid bg-primary py-5 mb-5 page-header">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 text-center">
+                    <h1 class="display-3 text-white animated slideInDown">Add Question</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb justify-content-center">
+                            <li class="breadcrumb-item"><a class="text-white" href="{% url 'index' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a class="text-white" href="#">Pages</a></li>
+                            <li class="breadcrumb-item text-white active" aria-current="page">Add Question</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+
+    <!-- Add Question Form Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Add Question</h6>
+                <h1 class="mb-5">Fill in the details to add a new question</h1>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-12 wow fadeInUp" data-wow-delay="0.5s">
+                    <form id="questionForm" method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3">Choose Question Type</h5>
+                            <select id="questionType" name="questionType" class="form-select" required>
+                                <option value="simple_type">Simple Type</option>
+                                <option value="r_and_a_type">R & A Type</option>
+                                <option value="list_type_1">List Type 1</option>
+                                <option value="list_type_2">List Type 2</option>
+                            </select>
+                        </div>
+
+                        <!-- Common Fields -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="examName" name="exam_name" placeholder="Exam Name" required>
+                                    <label for="examName">Exam Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="year" name="exam_year" placeholder="Year" required>
+                                    <label for="year">Year</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="degreeOfDifficulty" name="degree_of_difficulty" placeholder="Degree of Difficulty" required>
+                                    <label for="degreeOfDifficulty">Degree of Difficulty</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="subjectName" name="subject_name" placeholder="Subject Name" required>
+                                    <label for="subjectName">Subject Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="areaName" name="area_name" placeholder="Area Name" required>
+                                    <label for="areaName">Area Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="partName" name="part_name" placeholder="Part Name" required>
+                                    <label for="partName">Part Name</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Sections -->
+                        <div id="simple_type" class="form-section d-none">
+                            {{ simple_form.as_p }}
+                        </div>
+                        <div id="r_and_a_type" class="form-section d-none">
+                            {{ r_and_a_form.as_p }}
+                        </div>
+                        <div id="list_type_1" class="form-section d-none">
+                            {{ list_type_1_form.as_p }}
+                        </div>
+                        <div id="list_type_2" class="form-section d-none">
+                            {{ list_type_2_form.as_p }}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="col-12 mt-4">
+                            <button class="btn btn-primary w-100 py-3" type="submit">Submit Question</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add Question Form End -->
+{% endblock content %}
+
+{% block custom_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const questionTypeRadios = document.querySelectorAll('input[name="questionType"]');
+        const mcq1Section = document.getElementById('mcq1Section');
+        const rAndNSection = document.getElementById('rAndNSection');
+        const listISection = document.getElementById('listISection');
+        const listIISection = document.getElementById('listIISection');
+    
+        function toggleRequiredFields(section, shouldBeRequired) {
+            const inputs = section.querySelectorAll('input, textarea');
+            inputs.forEach(function(input) {
+                if (shouldBeRequired) {
+                    input.setAttribute('required', 'required');
+                } else {
+                    input.removeAttribute('required');
+                }
+            });
+        }
+    
+        function hideAllSections() {
+            mcq1Section.classList.add('d-none');
+            rAndNSection.classList.add('d-none');
+            listISection.classList.add('d-none');
+            listIISection.classList.add('d-none');
+    
+            toggleRequiredFields(mcq1Section, false);
+            toggleRequiredFields(rAndNSection, false);
+            toggleRequiredFields(listISection, false);
+            toggleRequiredFields(listIISection, false);
+        }
+    
+        questionTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                hideAllSections(); // Hide all sections and remove required attributes
+    
+                if (this.value === 'simple_type') {
+                    mcq1Section.classList.remove('d-none');
+                    toggleRequiredFields(mcq1Section, true);
+                } else if (this.value === 'r_and_a_type') {
+                    rAndNSection.classList.remove('d-none');
+                    toggleRequiredFields(rAndNSection, true);
+                } else if (this.value === 'list_type_1') {
+                    listISection.classList.remove('d-none');
+                    toggleRequiredFields(listISection, true);
+                } else if (this.value === 'list_type_2') {
+                    listIISection.classList.remove('d-none');
+                    toggleRequiredFields(listIISection, true);
+                }
+            });
+        });
+    
+        // Run on page load to ensure the correct fields are visible and required based on the initial state
+        const checkedRadio = document.querySelector('input[name="questionType"]:checked');
+        if (checkedRadio) {
+            checkedRadio.dispatchEvent(new Event('change'));
+        }
+    });
+    
+</script>
+{% endblock %}
+
+
+
+
+
+
+<!--Working code end-->
+
+
+{% comment %} {% extends 'base.html' %}
+
+{% block title %}Add Question - Hajela's IAS Academy (HIA){% endblock %}
+
+{% block content %}
+    <!-- Header Start -->
+    <div class="container-fluid bg-primary py-5 mb-5 page-header">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 text-center">
+                    <h1 class="display-3 text-white animated slideInDown">Add Question</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb justify-content-center">
+                            <li class="breadcrumb-item"><a class="text-white" href="{% url 'index' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a class="text-white" href="#">Pages</a></li>
+                            <li class="breadcrumb-item text-white active" aria-current="page">Add Question</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+
+    <!-- Add Question Form Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Add Question</h6>
+                <h1 class="mb-5">Fill in the details to add a new question</h1>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-12 wow fadeInUp" data-wow-delay="0.5s">
+                    <form id="questionForm" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <!-- Question Type Selection -->
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <h5 class="text-primary mb-3">Choose Question Type</h5>
+                                <div class="mb-3">
+                                    <input type="radio" class="btn-check" name="questionType" id="mcq1" value="simple_type" autocomplete="off" checked>
+                                    <label class="btn btn-outline-primary" for="mcq1">Simple Type</label>
+
+                                    <input type="radio" class="btn-check" name="questionType" id="rAndN" value="r_and_a_type" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="rAndN">R & A</label>
+
+                                    <input type="radio" class="btn-check" name="questionType" id="listI" value="list_type_1" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="listI">List-I</label>
+
+                                    <input type="radio" class="btn-check" name="questionType" id="listII" value="list_type_2" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="listII">List-II</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Common Fields -->
+                        <div class="row g-3">
+                            <div class="col-md-12 mb-3">
+                                <div class="form-floating">
+                                    <textarea class="form-control" name="question_part_first" id="question_part_first" placeholder="Question Part First" required></textarea>
+                                    <label for="question_part_first">Question Part First</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MCQ1 Section -->
+                        <div id="mcq1Section">
+                            <div class="row g-3">
+                                <!-- Options for MCQ -->
+                                <div id="optionsSection" class="col-md-12">
+                                    <label class="form-label">Options</label>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_a" placeholder="Option a" aria-label="Option a" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_b" placeholder="Option b" aria-label="Option b" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_c" placeholder="Option c" aria-label="Option c" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_d" placeholder="Option d" aria-label="Option d" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- R & N Section -->
+                        <div id="rAndNSection" class="d-none">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="reason" name="reason" placeholder="Reason" required>
+                                        <label for="reason">Reason</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="assertion" name="assertion" placeholder="Assertion" required>
+                                        <label for="assertion">Assertion</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" name="question_part_third" id="question_part_third" placeholder="Question Part Third" required></textarea>
+                                        <label for="question_part_third">Question Part Third</label>
+                                    </div>
+                                </div>
+                                <!-- Options -->
+                                <div id="optionsSection" class="col-md-12">
+                                    <label class="form-label">Options</label>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_a" placeholder="Option a" aria-label="Option a" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_b" placeholder="Option b" aria-label="Option b" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_c" placeholder="Option c" aria-label="Option c" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_d" placeholder="Option d" aria-label="Option d" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- List-I Section -->
+                        <div id="listISection" class="d-none">
+                            <div class="col-md-12">
+                                <label class="form-label">List-I</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="list_1_row1" placeholder="List-I Item 1" aria-label="List-I Item 1" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="list_1_row2" placeholder="List-I Item 2" aria-label="List-I Item 2" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="list_1_row3" placeholder="List-I Item 3" aria-label="List-I Item 3" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="list_1_row4" placeholder="List-I Item 4" aria-label="List-I Item 4" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="list_1_row5" placeholder="List-I Item 5" aria-label="List-I Item 5" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="list_1_row6" placeholder="List-I Item 6" aria-label="List-I Item 6" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="list_1_row7" placeholder="List-I Item 7" aria-label="List-I Item 7" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="list_1_row8" placeholder="List-I Item 8" aria-label="List-I Item 8" required>
+                                </div>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <div class="form-floating">
+                                    <textarea class="form-control" name="question_part_third" id="question_part_third" placeholder="Question Part Third" required></textarea>
+                                    <label for="question_part_third">Question Part Third</label>
+                                </div>
+                            </div>
+                            <!-- Options -->
+                            <div id="optionsSection" class="col-md-12">
+                                <label class="form-label">Options</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="answer_option_a" placeholder="Option a" aria-label="Option a" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="answer_option_b" placeholder="Option b" aria-label="Option b" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="answer_option_c" placeholder="Option c" aria-label="Option c" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="answer_option_d" placeholder="Option d" aria-label="Option d" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- List-II Section -->
+                        <div id="listIISection" class="d-none">
+                            <div class="row g-3">
+                                <!-- List-I Heading -->
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3 mt-3">
+                                        <input type="text" class="form-control" id="listIHeading" name="list_1_name" placeholder="List-I Heading" required>
+                                        <label for="listIHeading">List-I Heading</label>
+                                    </div>
+                                </div>
+                                <!-- List-II Heading -->
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3 mt-3">
+                                        <input type="text" class="form-control" id="listIIHeading" name="list_2_name" placeholder="List-II Heading" required>
+                                        <label for="listIIHeading">List-II Heading</label>
+                                    </div>
+                                </div>
+
+                                <!-- List-I Items -->
+                                <div class="col-md-6">
+                                    <label class="form-label">List-I Items</label>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="list_1_row1" placeholder="List-I Item 1" aria-label="List-I Item 1" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="list_1_row2" placeholder="List-I Item 2" aria-label="List-I Item 2" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="list_1_row3" placeholder="List-I Item 3" aria-label="List-I Item 3" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="list_1_row4" placeholder="List-I Item 4" aria-label="List-I Item 4" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="list_1_row5" placeholder="List-I Item 5" aria-label="List-I Item 5" required>
+                                    </div>
+                                </div>
+
+                                <!-- List-II Items -->
+                                <div class="col-md-6">
+                                    <label class="form-label">List-II Items</label>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="list_2_row1" placeholder="List-II Item 1" aria-label="List-II Item 1" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="list_2_row2" placeholder="List-II Item 2" aria-label="List-II Item 2" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="list_2_row3" placeholder="List-II Item 3" aria-label="List-II Item 3" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="list_2_row4" placeholder="List-II Item 4" aria-label="List-II Item 4" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="list_2_row5" placeholder="List-II Item 5" aria-label="List-II Item 5" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" name="question_part_third" id="questionPartThird" placeholder="Question Part Third" required></textarea>
+                                        <label for="questionPartThird">Question Part Third</label>
+                                    </div>
+                                </div>
+                                <!-- Options -->
+                                <div id="optionsSection" class="col-md-12">
+                                    <label class="form-label">Options</label>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_a" placeholder="Option a" aria-label="Option a" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_b" placeholder="Option b" aria-label="Option b" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_c" placeholder="Option c" aria-label="Option c" required>
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="answer_option_d" placeholder="Option d" aria-label="Option d" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Common Fields -->
+                        <div class="row g-3">
+                            <label class="form-label">Other Details</label>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="correctAnswer" name="correct_answer_choice" placeholder="Correct Answer" required>
+                                    <label for="correctAnswer">Correct Answer</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="answerDescription" name="correct_answer_description" placeholder="Answer Description" required>
+                                    <label for="answerDescription">Answer Description</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="examName" name="exam_name" placeholder="Exam Name" required>
+                                    <label for="examName">Exam Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="year" name="exam_year" placeholder="Year" required>
+                                    <label for="year">Year</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" step="0.001" class="form-control" id="marks" name="marks" placeholder="Marks" required>
+                                    <label for="marks">Marks</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" step="0.001" class="form-control" id="negativeMarks" name="negative_marks" placeholder="Negative Marks" required>
+                                    <label for="negativeMarks">Negative Marks</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="degreeOfDifficulty" name="degree_of_difficulty" placeholder="Degree of Difficulty" required>
+                                    <label for="degreeOfDifficulty">Degree of Difficulty</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="subjectName" name="subject_name" placeholder="Subject Name" required>
+                                    <label for="subjectName">Subject Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="areaName" name="area_name" placeholder="Area Name" required>
+                                    <label for="areaName">Area Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="partName" name="part_name" placeholder="Part Name" required>
+                                    <label for="partName">Part Name</label>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="col-12">
+                                <button class="btn btn-primary w-100 py-3" type="submit">Submit Question</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add Question Form End -->
+{% endblock content %}
+
+{% block custom_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const questionTypeRadios = document.querySelectorAll('input[name="questionType"]');
+        const mcq1Section = document.getElementById('mcq1Section');
+        const rAndNSection = document.getElementById('rAndNSection');
+        const listISection = document.getElementById('listISection');
+        const listIISection = document.getElementById('listIISection');
+    
+        function toggleRequiredFields(section, shouldBeRequired) {
+            const inputs = section.querySelectorAll('input, textarea');
+            inputs.forEach(function(input) {
+                if (shouldBeRequired) {
+                    input.setAttribute('required', 'required');
+                } else {
+                    input.removeAttribute('required');
+                }
+            });
+        }
+    
+        function hideAllSections() {
+            mcq1Section.classList.add('d-none');
+            rAndNSection.classList.add('d-none');
+            listISection.classList.add('d-none');
+            listIISection.classList.add('d-none');
+    
+            toggleRequiredFields(mcq1Section, false);
+            toggleRequiredFields(rAndNSection, false);
+            toggleRequiredFields(listISection, false);
+            toggleRequiredFields(listIISection, false);
+        }
+    
+        questionTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                hideAllSections(); // Hide all sections and remove required attributes
+    
+                if (this.value === 'simple_type') {
+                    mcq1Section.classList.remove('d-none');
+                    toggleRequiredFields(mcq1Section, true);
+                } else if (this.value === 'r_and_a_type') {
+                    rAndNSection.classList.remove('d-none');
+                    toggleRequiredFields(rAndNSection, true);
+                } else if (this.value === 'list_type_1') {
+                    listISection.classList.remove('d-none');
+                    toggleRequiredFields(listISection, true);
+                } else if (this.value === 'list_type_2') {
+                    listIISection.classList.remove('d-none');
+                    toggleRequiredFields(listIISection, true);
+                }
+            });
+        });
+    
+        // Run on page load to ensure the correct fields are visible and required based on the initial state
+        const checkedRadio = document.querySelector('input[name="questionType"]:checked');
+        if (checkedRadio) {
+            checkedRadio.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+{% endblock custom_js %} {% endcomment %}
+
+
+
+
+
+
+
+
+
+
+
+<!--Working code end-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %} {% extends 'base.html' %}
+
+{% block title %}Add Question - Hajela's IAS Academy (HIA){% endblock %}
+
+{% block content %}
+    <!-- Header Start -->
+    <div class="container-fluid bg-primary py-5 mb-5 page-header">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 text-center">
+                    <h1 class="display-3 text-white animated slideInDown">Add Question</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb justify-content-center">
+                            <li class="breadcrumb-item"><a class="text-white" href="{% url 'index' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a class="text-white" href="#">Pages</a></li>
+                            <li class="breadcrumb-item text-white active" aria-current="page">Add Question</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+
+    <!-- Add Question Form Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Add Question</h6>
+                <h1 class="mb-5">Fill in the details to add a new question</h1>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-12 wow fadeInUp" data-wow-delay="0.5s">
+                    <form id="questionForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Question Type</label>
+                                    <div>
+                                        <input type="radio" class="btn-check" name="questionType" id="mcq1" value="MCQ1" autocomplete="off" required>
+                                        <label class="btn btn-outline-primary" for="mcq1">MCQ1</label>
+                                        <input type="radio" class="btn-check" name="questionType" id="fillBlanks" value="Fill in the blanks" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="fillBlanks">Fill in the blanks</label>
+                                        <input type="radio" class="btn-check" name="questionType" id="trueFalse" value="True & False" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="trueFalse">True & False</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3 d-none" id="mcqTypeDiv">
+                                    <label for="mcqType" class="form-label">MCQ Type</label>
+                                    <select class="form-control" id="mcqType" name="mcqType">
+                                        <option value="">Select Type</option>
+                                        <option value="Simple Type">Simple Type</option>
+                                        <option value="R & N">R & N</option>
+                                        <option value="List-I">List-I</option>
+                                        <option value="List-II">List-II</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="questionNo" name="questionNo" placeholder="Question Number" required>
+                                    <label for="questionNo">Question Number</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="questionPartFirst" name="questionPartFirst" placeholder="Question First Part" required>
+                                    <label for="questionPartFirst">Question First Part</label>
+                                </div>
+                            </div>
+                            <div class="col-md-12 d-none" id="rnContainer">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="reason" name="reason" placeholder="Reason">
+                                    <label for="reason">Reason</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="assertion" name="assertion" placeholder="Assertion">
+                                    <label for="assertion">Assertion</label>
+                                </div>
+                            </div>
+                            <div class="col-md-12 d-none" id="listIContainer">
+                                <label class="form-label">List-I</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="listI[]" placeholder="List-I Item" aria-label="List-I Item">
+                                    <button class="btn btn-outline-secondary" type="button" id="addListIItem">+</button>
+                                </div>
+                            </div>
+                            <div class="col-md-12 d-none" id="listIIContainer">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="listIIHeading1" name="listIIHeading1" placeholder="List-II Heading 1">
+                                            <label for="listIIHeading1">List-II Heading 1</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="listIIHeading2" name="listIIHeading2" placeholder="List-II Heading 2">
+                                            <label for="listIIHeading2">List-II Heading 2</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label">List-II Item 1</label>
+                                        <div class="input-group mb-3">
+                                            <input type="text" class="form-control" name="listI[]" placeholder="List-II Item 1" aria-label="List-II Item 1">
+                                            <button class="btn btn-outline-secondary" type="button" id="addListIIItem1">+</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">List-II Item 2</label>
+                                        <div class="input-group mb-3">
+                                            <input type="text" class="form-control" name="listII[]" placeholder="List-II Item 2" aria-label="List-II Item 2">
+                                            <button class="btn btn-outline-secondary" type="button" id="addListIIItem2">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 d-none" id="questionPart2Container">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="questionPartSecond" name="questionPartSecond" placeholder="Question Part 2">
+                                    <label for="questionPartSecond">Question Part 2</label>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Options</label>
+                                <div class="input-group mb-3" id="optionsContainer">
+                                    <input type="text" class="form-control" name="options[]" placeholder="Option 1" aria-label="Option 1">
+                                    <button class="btn btn-outline-secondary" type="button" id="addOption">+</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="correctAnswer" name="correctAnswer" placeholder="Correct Answer" required>
+                                    <label for="correctAnswer">Correct Answer</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="answerDescription" name="answerDescription" placeholder="Answer Description" required>
+                                    <label for="answerDescription">Answer Description</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="examName" name="examName" placeholder="Exam Name" required>
+                                    <label for="examName">Exam Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="year" name="year" placeholder="Year" required>
+                                    <label for="year">Year</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" step="0.001" class="form-control" id="marks" name="marks" placeholder="Marks" required>
+                                    <label for="marks">Marks</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="number" step="0.001" class="form-control" id="negativeMarks" name="negativeMarks" placeholder="Negative Marks" required>
+                                    <label for="negativeMarks">Negative Marks</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="degreeOfDifficulty" name="degreeOfDifficulty" placeholder="Degree of Difficulty" required>
+                                    <label for="degreeOfDifficulty">Degree of Difficulty</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="subjectName" name="subjectName" placeholder="Subject Name" required>
+                                    <label for="subjectName">Subject Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="areaName" name="areaName" placeholder="Area Name" required>
+                                    <label for="areaName">Area Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="partName" name="partName" placeholder="Part Name" required>
+                                    <label for="partName">Part Name</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary w-100 py-3" type="submit">Submit Question</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add Question Form End -->
+{% endblock content %}
+
+{% block custom_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('input[name="questionType"]').change(function() {
+            if ($('#mcq1').is(':checked')) {
+                $('#mcqTypeDiv').removeClass('d-none');
+            } else {
+                $('#mcqTypeDiv').addClass('d-none');
+                $('#listIContainer').addClass('d-none');
+                $('#listIIContainer').addClass('d-none');
+                $('#rnContainer').addClass('d-none');
+                $('#questionPart2Container').addClass('d-none');
+                $('#questionPartSecond').prop('required', false);
+            }
+        });
+
+        $('#mcqType').change(function() {
+            const mcqTypeValue = $(this).val();
+            $('#listIContainer').addClass('d-none');
+            $('#listIIContainer').addClass('d-none');
+            $('#rnContainer').addClass('d-none');
+            $('#questionPart2Container').addClass('d-none');
+            $('#questionPartSecond').prop('required', false);
+
+            if (mcqTypeValue === 'R & N') {
+                $('#rnContainer').removeClass('d-none');
+                $('#questionPart2Container').removeClass('d-none');
+                $('#questionPartSecond').prop('required', true);
+            } else if (mcqTypeValue === 'List-I') {
+                $('#listIContainer').removeClass('d-none');
+                $('#questionPart2Container').removeClass('d-none');
+                $('#questionPartSecond').prop('required', true);
+            } else if (mcqTypeValue === 'List-II') {
+                $('#listIIContainer').removeClass('d-none');
+                $('#questionPart2Container').removeClass('d-none');
+                $('#questionPartSecond').prop('required', true);
+            }
+        });
+
+        $('#addOption').click(function() {
+            let optionsIndex = $('#optionsContainer .input-group').length + 1;
+            let newOption = `<div class="input-group mb-3">
+                                <input type="text" class="form-control" name="options[]" placeholder="Option ` + optionsIndex + `" aria-label="Option ` + optionsIndex + `">
+                                <button class="btn btn-outline-secondary" type="button" onclick="removeOption(this)">-</button>
+                            </div>`;
+            $('#optionsContainer').append(newOption);
+        });
+
+        $('#addListIItem').click(function() {
+            let listIIndex = $('#listIContainer .input-group').length + 1;
+            let newListIItem = `<div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="listI[]" placeholder="List-I Item ` + listIIndex + `" aria-label="List-I Item ` + listIIndex + `">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="removeOption(this)">-</button>
+                                </div>`;
+            $('#listIContainer').append(newListIItem);
+        });
+
+        $('#addListIIItem1').click(function() {
+            let listIIIndex = $('#listIIContainer .col-md-6').length / 2 + 1;
+            let newListIIItem = `<div class="col-md-6">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="listI[]" placeholder="List-II Item ` + (listIIIndex * 2 - 1) + `" aria-label="List-II Item ` + (listIIIndex * 2 - 1) + `">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="removeOption(this)">-</button>
+                                    </div>`;
+            $('#listIIContainer').append(newListIIItem);
+        });
+
+        $('#addListIIItem2').click(function() {
+            let listIIIndex = $('#listIIContainer .col-md-6').length / 2 + 1;
+            let newListIIItem = `<div class="col-md-6">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" name="listII[]" placeholder="List-II Item ` + (listIIIndex * 2) + `" aria-label="List-II Item ` + (listIIIndex * 2) + `">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="removeOption(this)">-</button>
+                                    </div>`;
+            $('#listIIContainer').append(newListIIItem);
+        });
+
+        $('#questionForm').submit(function(event) {
+           event.preventDefault();
+           let formData = $(this).serializeArray();
+           let data = {
+               questionType: $('input[name="questionType"]:checked').val(),
+               mcqType: $('#mcqType').val(),
+               questionNo: $('#questionNo').val(),
+               questionPartFirst: $('#questionPartFirst').val(),
+               reason: $('#reason').val(),
+               assertion: $('#assertion').val(),
+               questionPartSecond: $('#questionPartSecond').val(),
+               correctAnswer: $('#correctAnswer').val(),
+               answerDescription: $('#answerDescription').val(),
+               examName: $('#examName').val(),
+               year: $('#year').val(),
+               marks: $('#marks').val(),
+               negativeMarks: $('#negativeMarks').val(),
+               degreeOfDifficulty: $('#degreeOfDifficulty').val(),
+               subjectName: $('#subjectName').val(),
+               areaName: $('#areaName').val(),
+               partName: $('#partName').val(),
+               listIIHeading1: $('#listIIHeading1').val(),
+               listIIHeading2: $('#listIIHeading2').val(),
+               options: $('input[name="options[]"]').map(function() { return $(this).val(); }).get(),
+               listI: $('input[name="listI[]"]').map(function() { return $(this).val(); }).get(),
+               listII: $('input[name="listII[]"]').map(function() { return $(this).val(); }).get(),
+           };
+
+           $.ajax({
+               url: "{% url 'add-question' %}",
+               method: "POST",
+               data: JSON.stringify(data),
+               contentType: "application/json",
+               headers: {
+                   'X-CSRFToken': '{{ csrf_token }}',
+               },
+               success: function(response) {
+                   alert("Question added successfully!");
+                   window.location.reload();
+               },
+               error: function(error) {
+                   alert("Error adding question. Please try again.");
+               }
+           });
+       });
+    });
+
+    function removeOption(btn) {
+        $(btn).closest('.input-group').remove();
+    }
+</script>
+{% endblock custom_js %} {% endcomment %}

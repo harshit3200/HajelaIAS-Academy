@@ -1,0 +1,482 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block title %}Generate Test Paper{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+       <!-- Filters Section -->
+<div class="col-lg-3">
+  <h4 class="mb-3">Filter Questions</h4>
+  <form method="GET" id="filterForm">
+
+    <!-- ✅ Batch -->
+    <div class="form-group mb-3">
+      <label for="batch">Batch</label>
+      <select name="batch_id" id="batch" class="form-control">
+        <option value="">Select Batch</option>
+        {% for batch in batches %}
+          <option value="{{ batch.id }}" {% if batch.id|stringformat:"s" == selected_batch_id %}selected{% endif %}>
+            {{ batch.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- ✅ Area -->
+    <div class="form-group mb-3">
+      <label for="area">Area</label>
+      <select name="area" id="area" class="form-control">
+        <option value="">Select Area</option>
+        {% for area in areas %}
+          <option value="{{ area.area_SI_Code }}" {% if request.GET.area == area.area_SI_Code|stringformat:"s" %}selected{% endif %}>
+            {{ area.area_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- ✅ Section -->
+    <div class="form-group mb-3">
+      <label for="section">Section</label>
+      <select name="section" id="section" class="form-control">
+        <option value="">Select Section</option>
+        {% for section in sections %}
+          <option value="{{ section.section_Unit_SI }}" {% if request.GET.section == section.section_Unit_SI|stringformat:"s" %}selected{% endif %}>
+            {{ section.section_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- ✅ Part -->
+    <div class="form-group mb-3">
+      <label for="part">Part</label>
+      <select name="part" id="part" class="form-control">
+        <option value="">Select Part</option>
+        {% for part in parts %}
+          <option value="{{ part.part_serial }}" {% if request.GET.part == part.part_serial|stringformat:"s" %}selected{% endif %}>
+            {{ part.part_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- ✅ Chapter -->
+    <div class="form-group mb-3">
+      <label for="chapter">Chapter</label>
+      <select name="chapter" id="chapter" class="form-control">
+        <option value="">Select Chapter</option>
+        {% for chapter in chapters %}
+          <option value="{{ chapter.chapter_number }}" {% if request.GET.chapter == chapter.chapter_number|stringformat:"s" %}selected{% endif %}>
+            {{ chapter.chapter_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- ✅ Topic -->
+    <div class="form-group mb-3">
+      <label for="topic">Topic</label>
+      <select name="topic" id="topic" class="form-control">
+        <option value="">Select Topic</option>
+        {% for topic in topics %}
+          <option value="{{ topic.topic_SI_number }}" {% if request.GET.topic == topic.topic_SI_number|stringformat:"s" %}selected{% endif %}>
+            {{ topic.topic_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- ✅ Subtopic -->
+    <div class="form-group mb-3">
+      <label for="subtopic">Subtopic</label>
+      <select name="subtopic" id="subtopic" class="form-control">
+        <option value="">Select Subtopic</option>
+        {% for subtopic in subtopics %}
+          <option value="{{ subtopic.sub_topic_SI_Number }}" {% if request.GET.subtopic == subtopic.sub_topic_SI_Number|stringformat:"s" %}selected{% endif %}>
+            {{ subtopic.sub_topic_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- ✅ Question Sub Type -->
+    <div class="form-group mb-3">
+      <label for="question_sub_type">Question Sub Type</label>
+      <select name="question_sub_type" id="question_sub_type" class="form-control">
+        <option value="">Select Question Sub Type</option>
+        <option value="simple_type" {% if request.GET.question_sub_type == "simple_type" %}selected{% endif %}>Simple Type</option>
+        <option value="r_and_a_type" {% if request.GET.question_sub_type == "r_and_a_type" %}selected{% endif %}>R & A Type</option>
+        <option value="list_type_1" {% if request.GET.question_sub_type == "list_type_1" %}selected{% endif %}>List Type 1</option>
+        <option value="list_type_2" {% if request.GET.question_sub_type == "list_type_2" %}selected{% endif %}>List Type 2</option>
+        <option value="true_and_false_type" {% if request.GET.question_sub_type == "true_and_false_type" %}selected{% endif %}>True & False</option>
+        <option value="fill_in_the_blank_type" {% if request.GET.question_sub_type == "fill_in_the_blank_type" %}selected{% endif %}>Fill in the Blank</option>
+      </select>
+    </div>
+
+    <!-- ✅ Exam Year -->
+    <div class="form-group mb-3">
+      <label for="exam_year">Exam Year</label>
+      <input type="text" name="exam_year" id="exam_year" value="{{ request.GET.exam_year }}" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Filter</button>
+  </form>
+</div>
+
+        <!-- Questions Section -->
+        <div class="col-lg-9">
+            <h4 class="mb-3">Auto & Manual Generate Test Paper</h4>
+            <form method="POST" action="{% url 'generate_test' %}">
+                {% csrf_token %}
+                {% if selected_batch_id %}
+                    <input type="hidden" name="batch_id" value="{{ selected_batch_id }}">
+                {% else %}
+                    <p style="color: red;"><strong>Please select a batch and filter before generating a test.</strong></p>
+                {% endif %}
+
+                <input type="hidden" name="area" value="{{ request.GET.area }}">
+                <input type="hidden" name="section" value="{{ request.GET.section }}">
+                <input type="hidden" name="part" value="{{ request.GET.part }}">
+                <input type="hidden" name="chapter" value="{{ request.GET.chapter }}">
+                <input type="hidden" name="topic" value="{{ request.GET.topic }}">
+                <input type="hidden" name="subtopic" value="{{ request.GET.subtopic }}">
+                <input type="hidden" name="question_sub_type" value="{{ request.GET.question_sub_type }}">
+                <input type="hidden" name="exam_year" value="{{ request.GET.exam_year }}">
+
+                <label>Number of Questions:</label>
+                <input type="number" name="num_questions" min="1" class="form-control mb-2" required>
+
+                <button type="submit" name="action" value="generate" class="btn btn-success">Generate Random Test</button>
+                <button type="submit" name="action" value="reset" class="btn btn-danger ml-2">Reset Used Questions</button>
+            </form>
+
+            <hr class="my-4">
+
+            <h4 class="mb-3">Manually Select Questions</h4>
+
+            <form method="POST" action="{% url 'generate_test' %}">
+  {% csrf_token %}
+  {% if selected_batch_id %}
+    <input type="hidden" name="batch_id" value="{{ selected_batch_id }}">
+  {% else %}
+    <p style="color: red;"><strong>Please select a batch and filter before manually generating a test.</strong></p>
+  {% endif %}
+  <input type="hidden" name="action" value="manual_generate">
+
+  <div class="row">
+    {% for pair in questions %}
+    <div class="col-12 mb-4">
+      <!-- ✅ Checkbox: use English ID, fallback Hindi -->
+      <div class="form-check mb-2">
+        <input type="checkbox" name="manual_questions" 
+               value="{{ pair.english.id|default:pair.hindi.id }}" 
+               class="form-check-input">
+        <label class="form-check-label">
+          <strong>Question {{ pair.english.question_number|default:pair.hindi.question_number }}</strong>
+        </label>
+      </div>
+
+      <div class="row">
+        <!-- ✅ English Card -->
+        <div class="col-md-6 mb-2">
+          <div class="card h-100 border">
+            <div class="card-body">
+              {% if pair.english %}
+                <h6><strong>English — Question {{ pair.english.question_number }}</strong></h6>
+                <p>Type Of Question --> {{ pair.english.question_sub_type }}</p>
+
+                {% if pair.english.question_sub_type in 'simple_type true_and_false_type fill_in_the_blank_type' %}
+                  <p>{{ pair.english.question_part|default:pair.english.script }}</p>
+                {% elif pair.english.question_sub_type == 'r_and_a_type' %}
+                  <p>{{ pair.english.question_part_first }}</p>
+                  <p style="color: #ea5323;">Assertion -</p>
+                  <p>{{ pair.english.assertion }}</p>
+                  <p style="color: rgb(0 63 137);">Reason -</p>
+                  <p>{{ pair.english.reason }}</p>
+                {% elif pair.english.question_sub_type == 'list_type_1' %}
+                  <p><strong>{{ pair.english.question_part_first }}</strong></p>
+                  <ol>
+                    {% for i in 1|to_range:6 %}
+                      {% with field="list_1_row"|add:i|stringformat:"s" %}
+                        {% with item=pair.english|get_dynamic_field:field %}
+                          {% if item %}<li>{{ item }}</li>{% endif %}
+                        {% endwith %}
+                      {% endwith %}
+                    {% endfor %}
+                  </ol>
+                  <p><strong>{{ pair.english.question_part_third }}</strong></p>
+                {% elif pair.english.question_sub_type == 'list_type_2' %}
+                  <p>{{ pair.english.question_part_first }}</p>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>{{ pair.english.list_1_name|default:"List-I" }}</th>
+                        <th>{{ pair.english.list_2_name|default:"List-II" }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <ol type="A">
+                            {% for item in pair.english.list_1_items %}
+                              <li>{{ item }}</li>
+                            {% endfor %}
+                          </ol>
+                        </td>
+                        <td>
+                          <ol type="1">
+                            {% for item in pair.english.list_2_items %}
+                              <li>{{ item }}</li>
+                            {% endfor %}
+                          </ol>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                {% endif %}
+
+                {% if pair.english.answer_option_a %}<p>(a) {{ pair.english.answer_option_a }}</p>{% endif %}
+                {% if pair.english.answer_option_b %}<p>(b) {{ pair.english.answer_option_b }}</p>{% endif %}
+                {% if pair.english.answer_option_c %}<p>(c) {{ pair.english.answer_option_c }}</p>{% endif %}
+                {% if pair.english.answer_option_d %}<p>(d) {{ pair.english.answer_option_d }}</p>{% endif %}
+
+                <hr>
+                <p><strong>Correct Answer:</strong> {{ pair.english.correct_answer_choice }}</p>
+                <p><strong>Solution:</strong> {{ pair.english.correct_answer_description|default:"None" }}</p>
+              {% else %}
+                <p class="text-danger">No English version available.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ Hindi Card -->
+        <div class="col-md-6 mb-2">
+          <div class="card h-100 border">
+            <div class="card-body">
+              {% if pair.hindi %}
+                <h6><strong>Hindi — Question {{ pair.hindi.question_number }}</strong></h6>
+                <p>Type Of Question --> {{ pair.hindi.question_sub_type }}</p>
+
+                {% if pair.hindi.question_sub_type in 'simple_type true_and_false_type fill_in_the_blank_type' %}
+                  <p>{{ pair.hindi.question_part_hi }}</p>
+                {% elif pair.hindi.question_sub_type == 'r_and_a_type' %}
+                  <p>{{ pair.hindi.question_part_first_hi }}</p>
+                  <p style="color: #ea5323;">Assertion -</p>
+                  <p>{{ pair.hindi.assertion_hi }}</p>
+                  <p style="color: rgb(0 63 137);">Reason -</p>
+                  <p>{{ pair.hindi.reason_hi }}</p>
+                {% elif pair.hindi.question_sub_type == 'list_type_1' %}
+                  <p><strong>{{ pair.hindi.question_part_first_hi }}</strong></p>
+                  <ol>
+                    {% for i in 1|to_range:6 %}
+                      {% with field="list_1_row_hi"|add:i|stringformat:"s" %}
+                        {% with item=pair.hindi|get_dynamic_field:field %}
+                          {% if item %}<li>{{ item }}</li>{% endif %}
+                        {% endwith %}
+                      {% endwith %}
+                    {% endfor %}
+                  </ol>
+                  <p><strong>{{ pair.hindi.question_part_third_hi }}</strong></p>
+                {% elif pair.hindi.question_sub_type == 'list_type_2' %}
+                  <p>{{ pair.hindi.question_part_first_hi }}</p>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>{{ pair.hindi.list_1_name_hi|default:"List-I" }}</th>
+                        <th>{{ pair.hindi.list_2_name_hi|default:"List-II" }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <ol type="A">
+                            {% for item in pair.hindi.list_1_items_hi %}
+                              <li>{{ item }}</li>
+                            {% endfor %}
+                          </ol>
+                        </td>
+                        <td>
+                          <ol type="1">
+                            {% for item in pair.hindi.list_2_items_hi %}
+                              <li>{{ item }}</li>
+                            {% endfor %}
+                          </ol>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                {% endif %}
+
+                {% if pair.hindi.answer_option_a_hi %}<p>(a) {{ pair.hindi.answer_option_a_hi }}</p>{% endif %}
+                {% if pair.hindi.answer_option_b_hi %}<p>(b) {{ pair.hindi.answer_option_b_hi }}</p>{% endif %}
+                {% if pair.hindi.answer_option_c_hi %}<p>(c) {{ pair.hindi.answer_option_c_hi }}</p>{% endif %}
+                {% if pair.hindi.answer_option_d_hi %}<p>(d) {{ pair.hindi.answer_option_d_hi }}</p>{% endif %}
+
+                <hr>
+                <p><strong>Correct Answer:</strong> {{ pair.hindi.correct_answer_choice }}</p>
+                <p><strong>Solution:</strong> {{ pair.hindi.correct_answer_description_hi|default:"None" }}</p>
+              {% else %}
+                <p class="text-danger">No Hindi version available.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+      <p>No questions found.</p>
+    {% endfor %}
+  </div>
+
+  <button type="submit" class="btn btn-primary mt-3">Generate from Selected</button>
+</form>
+
+
+
+
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+
+                    {% for num in paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    // =========================
+    // 1️⃣ When AREA changes => Load SECTIONS
+    // =========================
+    $('#area').change(function() {
+      var areaID = $(this).val();
+      $('#section').html('<option value="">Select Section</option>');
+      $('#part').html('<option value="">Select Part</option>');
+      $('#chapter').html('<option value="">Select Chapter</option>');
+      $('#topic').html('<option value="">Select Topic</option>');
+      $('#subtopic').html('<option value="">Select Subtopic</option>');
+
+      if(areaID) {
+        $.get('/api/get-sections/', { area_id: areaID }, function(data) {
+          $.each(data.sections, function(i, item) {
+            $('#section').append($('<option>', {
+              value: item.section_Unit_SI,
+              text: item.section_name
+            }));
+          });
+        });
+      }
+    });
+
+    // =========================
+    // 2️⃣ When SECTION changes => Load PARTS
+    // =========================
+    $('#section').change(function() {
+      var sectionID = $(this).val();
+      $('#part').html('<option value="">Select Part</option>');
+      $('#chapter').html('<option value="">Select Chapter</option>');
+      $('#topic').html('<option value="">Select Topic</option>');
+      $('#subtopic').html('<option value="">Select Subtopic</option>');
+
+      if(sectionID) {
+        $.get('/api/get-parts/', { section_id: sectionID }, function(data) {
+          $.each(data.parts, function(i, item) {
+            $('#part').append($('<option>', {
+              value: item.part_serial,
+              text: item.part_name
+            }));
+          });
+        });
+      }
+    });
+
+    // =========================
+    // 3️⃣ When PART changes => Load CHAPTERS
+    // =========================
+    $('#part').change(function() {
+      var partID = $(this).val();
+      $('#chapter').html('<option value="">Select Chapter</option>');
+      $('#topic').html('<option value="">Select Topic</option>');
+      $('#subtopic').html('<option value="">Select Subtopic</option>');
+
+      if(partID) {
+        $.get('/api/get-chapters/', { part_id: partID }, function(data) {
+          $.each(data.chapters, function(i, item) {
+            $('#chapter').append($('<option>', {
+              value: item.chapter_number,
+              text: item.chapter_name
+            }));
+          });
+        });
+      }
+    });
+
+    // =========================
+    // 4️⃣ When CHAPTER changes => Load TOPICS
+    // =========================
+    $('#chapter').change(function() {
+      var chapterID = $(this).val();
+      $('#topic').html('<option value="">Select Topic</option>');
+      $('#subtopic').html('<option value="">Select Subtopic</option>');
+
+      if(chapterID) {
+        $.get('/api/get-topics/', { chapter_id: chapterID }, function(data) {
+          $.each(data.topics, function(i, item) {
+            $('#topic').append($('<option>', {
+              value: item.topic_SI_number,
+              text: item.topic_name
+            }));
+          });
+        });
+      }
+    });
+
+    // =========================
+    // 5️⃣ When TOPIC changes => Load SUBTOPICS
+    // =========================
+    $('#topic').change(function() {
+      var topicID = $(this).val();
+      $('#subtopic').html('<option value="">Select Subtopic</option>');
+
+      if(topicID) {
+        $.get('/api/get-subtopics/', { topic_id: topicID }, function(data) {
+          $.each(data.subtopics, function(i, item) {
+            $('#subtopic').append($('<option>', {
+              value: item.sub_topic_SI_Number,
+              text: item.sub_topic_name
+            }));
+          });
+        });
+      }
+    });
+
+  });
+</script>
+
+{% endblock %}
+
+
+

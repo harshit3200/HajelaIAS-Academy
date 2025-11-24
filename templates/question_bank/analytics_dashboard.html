@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard - Hajela's IAS Academy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1>Analytics Dashboard</h1>
+        <p class="lead">Overview of Questions, Suggestions, and Contributions by Users</p>
+    </div>
+
+    <div class="row">
+        <!-- Bar Chart for Total Input Suggestions per User -->
+        <div class="col-md-6 mb-4">
+            <h3 class="text-center">Total Input Suggestions per User</h3>
+            <canvas id="suggestionsBarChart" height="200"></canvas>
+        </div>
+
+        <!-- Stacked Bar Chart for Questions Uploaded per User by Type -->
+        <div class="col-md-6 mb-4">
+            <h3 class="text-center">Questions Uploaded per User by Type</h3>
+            <canvas id="questionsTypeStackedChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <!-- Bar Chart for Phrases, Idioms, and Quotes per User -->
+        <div class="col-md-6">
+            <h3 class="text-center">Phrases, Idioms, and Quotes per User</h3>
+            <canvas id="phrasesIdiomsQuotesBarChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Parse data passed from the view
+    const users = JSON.parse('{{ users|safe }}');
+    const emails = JSON.parse('{{ emails|safe }}');
+    const suggestionCounts = JSON.parse('{{ suggestion_counts|safe }}');
+    const questionCounts = JSON.parse('{{ question_counts|safe }}');
+    const simpleCounts = JSON.parse('{{ simple_counts|safe }}');
+    const list1Counts = JSON.parse('{{ list1_counts|safe }}');
+    const list2Counts = JSON.parse('{{ list2_counts|safe }}');
+    const raCounts = JSON.parse('{{ ra_counts|safe }}');
+    const trueFalseCounts = JSON.parse('{{ true_false_counts|safe }}');
+    const fillBlankCounts = JSON.parse('{{ fill_blank_counts|safe }}');
+    const phraseCounts = JSON.parse('{{ phrase_counts|safe }}');
+    const idiomCounts = JSON.parse('{{ idiom_counts|safe }}');
+    const quoteCounts = JSON.parse('{{ quote_counts|safe }}');
+
+    // Bar Chart for Total Input Suggestions per User
+    const suggestionsBarChartCtx = document.getElementById('suggestionsBarChart').getContext('2d');
+    new Chart(suggestionsBarChartCtx, {
+        type: 'bar',
+        data: {
+            labels: users,
+            datasets: [{
+                label: 'Input Suggestions Uploaded',
+                data: suggestionCounts,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            //maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Email: ${emails[context.dataIndex]}, Suggestions: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Stacked Bar Chart for Questions Uploaded per User by Type
+    const questionsTypeStackedChartCtx = document.getElementById('questionsTypeStackedChart').getContext('2d');
+    new Chart(questionsTypeStackedChartCtx, {
+        type: 'bar',
+        data: {
+            labels: users,
+            datasets: [
+                { label: 'Simple Type', data: simpleCounts, backgroundColor: 'rgba(255, 99, 132, 0.6)' },
+                { label: 'List I Type', data: list1Counts, backgroundColor: 'rgba(75, 192, 192, 0.6)' },
+                { label: 'List II Type', data: list2Counts, backgroundColor: 'rgba(153, 102, 255, 0.6)' },
+                { label: 'R & A Type', data: raCounts, backgroundColor: 'rgba(255, 206, 86, 0.6)' },
+                { label: 'True & False', data: trueFalseCounts, backgroundColor: 'rgba(54, 162, 235, 0.6)' },
+                { label: 'Fill in the Blank', data: fillBlankCounts, backgroundColor: 'rgba(201, 203, 207, 0.6)' }
+            ]
+        },
+        options: {
+            responsive: true,
+            //maintainAspectRatio: false,
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, beginAtZero: true }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Email: ${emails[context.dataIndex]}, ${context.dataset.label}: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Bar Chart for Phrases, Idioms, and Quotes per User
+    const phrasesIdiomsQuotesBarChartCtx = document.getElementById('phrasesIdiomsQuotesBarChart').getContext('2d');
+    new Chart(phrasesIdiomsQuotesBarChartCtx, {
+        type: 'bar',
+        data: {
+            labels: users,
+            datasets: [
+                { label: 'Phrases', data: phraseCounts, backgroundColor: 'rgba(255, 99, 132, 0.6)' },
+                { label: 'Idioms', data: idiomCounts, backgroundColor: 'rgba(153, 102, 255, 0.6)' },
+                { label: 'Quotes', data: quoteCounts, backgroundColor: 'rgba(255, 206, 86, 0.6)' }
+            ]
+        },
+        options: {
+            responsive: true,
+            //maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Email: ${emails[context.dataIndex]}, ${context.dataset.label}: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

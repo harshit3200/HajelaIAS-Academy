@@ -1,0 +1,238 @@
+{% load static %}
+<!-- Sidebar Start -->
+<aside id="sidebar" class="sidebar">
+    <div class="close-btn-box">
+        <button type="button" class="close-sidebar-btn">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+    <div class="sidebar-menu-box">
+        <div class="sidebar-logo">
+            <a href="{% url 'admin_dashboard' %}">
+                <img src="{% static 'assets/images/icons/logo1.svg'%}" alt="logo">
+            </a>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <ul class="sidebar-nav" id="sidebar-content">
+            <li class="sidebar-header">
+                {% if user.is_authenticated %}
+                    {{ user.get_full_name|default:user.email }} ({{ user.user_type|title }})
+                {% else %}
+                    Guest Panel
+                {% endif %}
+            </li>
+
+            {% if user.is_authenticated %}
+
+                {% if user.user_type == "admin" %}
+                    <!-- ADMIN MENUS -->
+                    <li class="sidebar-item">
+                        <a href="{% url 'admin_dashboard' %}" class="sidebar-link">
+                            <i class="fa-solid fa-sliders pe-2"></i> Admin Dashboard
+                        </a>
+                    </li>
+
+                    <li class="sidebar-header">Admin Panel</li>
+
+                    <!-- QUESTION BANK -->
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#question-bank"
+                           aria-expanded="false" aria-controls="question-bank">
+                            <i class="fa-solid fa-database pe-2"></i> QUESTION BANK
+                        </a>
+                        <ul id="question-bank" class="sidebar-dropdown list-unstyled collapse">
+                            <li class="sidebar-sub-item"><a href="{% url 'view_questions' %}" class="sidebar-sub-link">View Questions</a></li>
+                            <li class="sidebar-sub-item"><a href="{% url 'add-simple-type-question' %}" class="sidebar-sub-link">Add Questions</a></li>
+                            <li class="sidebar-sub-item"><a href="{% url 'upload-file' %}" class="sidebar-sub-link">Upload Excel File</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- INPUT SUGGESTION -->
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#input-suggestion"
+                           aria-expanded="false" aria-controls="input-suggestion">
+                            <i class="fa-solid fa-lightbulb pe-2"></i> INPUT SUGGESTION
+                        </a>
+                        <ul id="input-suggestion" class="sidebar-dropdown list-unstyled collapse">
+                            <li class="sidebar-sub-item"><a href="{% url 'input-suggestion-list' %}" class="sidebar-sub-link">Input Suggestion List</a></li>
+                            <li class="sidebar-sub-item"><a href="{% url 'add-input-suggestion' %}" class="sidebar-sub-link">Add Input Suggestion</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- LECTURE NOTES -->
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#lecture-notes"
+                           aria-expanded="false" aria-controls="lecture-notes">
+                            <i class="fa-solid fa-book pe-2"></i> LECTURE NOTES
+                        </a>
+                        <ul id="lecture-notes" class="sidebar-dropdown list-unstyled collapse">
+                            <li class="sidebar-sub-item"><a href="{% url 'list_lecture_notes' %}" class="sidebar-sub-link">List Lecture Notes</a></li>
+                            <li class="sidebar-sub-item"><a href="{% url 'upload_lecture_note' %}" class="sidebar-sub-link">Upload Lecture Notes</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- AI TOOLS -->
+<li class="sidebar-item">
+    <a href="#" class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#ai-tools"
+       aria-expanded="false" aria-controls="ai-tools">
+        <i class="fa-solid fa-robot pe-2"></i> AI GENERATION
+    </a>
+    <ul id="ai-tools" class="sidebar-dropdown list-unstyled collapse">
+        <!-- Existing AI Tools -->
+        <li class="sidebar-sub-item">
+            <a href="{% url 'question_filter_view' %}" class="sidebar-sub-link">QUESTCURATOR</a>
+        </li>
+        <li class="sidebar-sub-item">
+            <a href="{% url 'generate_image' %}" class="sidebar-sub-link">Mirror Your Imagination</a>
+        </li>
+        <li class="sidebar-sub-item">
+            <a href="{% url 'generate_upsc_notes' %}" class="sidebar-sub-link">Notes AI</a>
+        </li>
+
+        <!-- ✅ New AI Tool: Keyword Generator -->
+        <li class="sidebar-sub-item">
+            <a href="{% url 'subtopic_list' %}" class="sidebar-sub-link">Keyword Generator</a>
+        </li>
+    </ul>
+</li>
+
+                    <!-- DATABASE -->
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#database"
+                           aria-expanded="false" aria-controls="database">
+                            <i class="fa-solid fa-server pe-2"></i> DATABASE
+                        </a>
+                        <ul id="database" class="sidebar-dropdown list-unstyled collapse">
+                            <li class="sidebar-sub-item"><a href="{% url 'content_by_subtopic' %}" class="sidebar-sub-link">Data Base Views</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Pending Approvals -->
+                    <li class="sidebar-item">
+                        <a href="{% url 'pending_users' %}" class="sidebar-link">
+                            <i class="fa-solid fa-user-check pe-2"></i> Pending Approvals
+                        </a>
+                    </li>
+
+                    <!-- Manage Permissions -->
+                    <li class="sidebar-item">
+                        <a href="{% url 'manage_permissions' %}" class="sidebar-link">
+                            <i class="fa-solid fa-shield-halved pe-2"></i> Manage Permissions
+                        </a>
+                    </li>
+
+                {% elif user.user_type == "staff" %}
+                    <!-- STAFF MENUS -->
+                    <li class="sidebar-item">
+                        <a href="{% url 'staff_dashboard' %}" class="sidebar-link">
+                            <i class="fa-solid fa-user-tie pe-2"></i> Staff Dashboard
+                        </a>
+                    </li>
+
+                    <!-- Staff sees only allowed features -->
+                    {% if "view_question" in permissions %}
+                        <li class="sidebar-item"><a href="{% url 'view_questions' %}" class="sidebar-link"><i class="fa-solid fa-database pe-2"></i> View Questions</a></li>
+                    {% endif %}
+                    {% if "add_question" in permissions %}
+                        <li class="sidebar-item"><a href="{% url 'add-simple-type-question' %}" class="sidebar-link"><i class="fa-solid fa-plus pe-2"></i> Add Questions</a></li>
+                    {% endif %}
+                    {% if "upload_excel" in permissions %}
+                        <li class="sidebar-item"><a href="{% url 'upload-file' %}" class="sidebar-link"><i class="fa-solid fa-file-excel pe-2"></i> Upload Excel</a></li>
+                    {% endif %}
+                    {% if "input_suggestion" in permissions %}
+                        <li class="sidebar-item"><a href="{% url 'add-input-suggestion' %}" class="sidebar-link"><i class="fa-solid fa-lightbulb pe-2"></i> Input Suggestions</a></li>
+                    {% endif %}
+                    {% if "lecture_notes" in permissions %}
+                        <li class="sidebar-item"><a href="{% url 'list_lecture_notes' %}" class="sidebar-link"><i class="fa-solid fa-book pe-2"></i> Lecture Notes</a></li>
+                    {% endif %}
+                    {% if "ai_notes" in permissions %}
+                        <li class="sidebar-item"><a href="{% url 'generate_upsc_notes' %}" class="sidebar-link"><i class="fa-solid fa-file-alt pe-2"></i> Notes AI</a></li>
+                    {% endif %}
+                    {% if "ai_image" in permissions %}
+                        <li class="sidebar-item"><a href="{% url 'generate_image' %}" class="sidebar-link"><i class="fa-solid fa-image pe-2"></i> Mirror Your Imagination</a></li>
+                    {% endif %}
+                    {% if "question_curator" in permissions %}
+                        <li class="sidebar-item"><a href="{% url 'question_filter_view' %}" class="sidebar-link"><i class="fa-solid fa-filter pe-2"></i> QuestCurator</a></li>
+                    {% endif %}
+
+                {% elif user.user_type == "student" %}
+                    <!-- STUDENT MENUS -->
+                    <li class="sidebar-item">
+                        <a href="{% url 'student_dashboard' %}" class="sidebar-link">
+                            <i class="fa-solid fa-user-graduate pe-2"></i> Student Dashboard
+                        </a>
+                    </li>
+                {% endif %}
+
+                <!-- Logout -->
+                <li class="sidebar-item">
+                    <a href="{% url 'logout' %}" class="sidebar-link text-danger">
+                        <i class="fa-solid fa-right-from-bracket pe-2"></i> Logout
+                    </a>
+                </li>
+
+            {% else %}
+                <!-- Guest -->
+                <li class="sidebar-item"><a href="{% url 'login' %}" class="sidebar-link text-primary"><i class="fa-solid fa-right-to-bracket pe-2"></i> Login</a></li>
+                <li class="sidebar-item"><a href="{% url 'register_user' %}" class="sidebar-link text-success"><i class="fa-solid fa-user-plus pe-2"></i> Sign Up</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</aside>
+<!-- Sidebar End -->
+
+
+
+<!-- Main Component Start -->
+<div class="main">
+    <!-- Header Section Start -->
+    <div id="header" class="header">
+        <div class="header-area">
+            <nav class="navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <div class="d-flex align-items-center gap-4">
+                            <div class="open-sidebar-btn open-sidebar-btn-1 active"><span></span><span></span><span></span></div>
+                            <div class="open-sidebar-btn open-sidebar-btn-2"><span></span><span></span><span></span></div>
+                            <form class="d-flex position-relative header-search-box">
+                                <input class="form-control me-2" type="text" placeholder="Search" aria-label="Search">
+                                <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                            </form>
+                        </div>
+                        <div class="header-right-menu">
+                            <ul class="header-right-btn-box">
+                                <!-- <li><a href="#" class="hrb-btn"><img src="{% static 'assets/images/icons/setting.svg'%}" alt="setting"></a></li>
+                                <li> -->
+                                    <div class="header-profile">
+                                        <div class="hp-img"><img src="{% static 'assets/images/icons/logo1.svg'%}" alt="user"></div>
+                                        <div class="dropdown">
+                                            <button class="hp-dropdown dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                {{ user.get_full_name|default:user.email }}
+                                            </button>
+                                            <div class="dropdown-menu header-profile-dropdown">
+                                                <div class="header-profile-info">
+                                                    <div class="header-profile-info-top">
+                                                        <div class="hpi-img"><img src="{% static 'assets/images/user-profile.png'%}" alt="user"></div>
+                                                        <div class="hpi-name"><h5>{{ user.get_full_name|default:user.email }}</h5><p>{{ user.email }}</p></div>
+                                                    </div>
+                                                    <div class="divider"></div>
+                                                    <div class="header-profile-info-bottom">
+                                                        <ul class="list-unstyled">
+                                                            <li><a href="{% url user.user_type|add:'_dashboard' %}"><span><img src="{% static 'assets/images/icons/dashboard-orange.svg'%}"></span>Dashboard</a></li>
+                                                        </ul>
+                                                    </div>
+                                                    <button type="button" class="header-logout-btn"><img src="{% static 'assets/images/icons/logout-purple.svg'%}" alt="logout"><a href="{% url 'logout' %}">Logout</a></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- Header Section End -->

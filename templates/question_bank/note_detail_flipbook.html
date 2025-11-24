@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Flipbook - {{ note.subtopic.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4 text-center">
+  <h3>{{ note.subtopic.name }} ({{ note.get_language_display }})</h3>
+
+  <div id="flipbook-wrapper" class="d-flex justify-content-center">
+    <div id="flipbook" class="shadow"></div>
+  </div>
+
+  <div class="controls mt-3">
+    <button id="prev" class="btn btn-secondary me-2">⬅️ Prev</button>
+    <button id="next" class="btn btn-secondary">Next ➡️</button>
+  </div>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
+
+<!-- turn.js -->
+<script src="https://cdn.jsdelivr.net/gh/blasten/turn.js/turn.min.js"></script>
+
+<style>
+  #flipbook-wrapper {
+    width: 100%;
+    max-width: 1000px;
+    overflow: hidden;
+  }
+
+  #flipbook {
+    width: 100%;
+    height: auto;
+  }
+
+  #flipbook canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    #flipbook {
+      width: 360px;
+      height: 480px;
+    }
+  }
+
+  @media (min-width: 769px) {
+    #flipbook {
+      width: 800px;
+      height: 600px;
+    }
+  }
+</style>
+
+<script>
+  const pdfUrl = "{{ note.note_file.url }}";
+
+  const isMobile = window.innerWidth < 768;
+
+  const loadFlipbook = async () => {
+    const container = $('#flipbook');
+    const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+    const totalPages = pdf.numPages;
+
+    container.html('');
+
+    for (let i = 1; i <= totalPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 1.5 });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      const context = canvas.getContext('2d');
+      await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+      const pageDiv = $('<div />').append(canvas);
+      container.append(pageDiv);
+    }
+
+    container.turn({
+      width: isMobile ? 360 : 800,
+      height: isMobile ? 480 : 600,
+      autoCenter: true,
+      display: isMobile ? 'single' : 'double',
+      acceleration: true,
+      elevation: 50,
+      gradients: true
+    });
+
+    $('#prev').on('click', () => container.turn('previous'));
+    $('#next').on('click', () => container.turn('next'));
+  };
+
+  loadFlipbook();
+</script>
+{% endblock %}

@@ -1,0 +1,83 @@
+<div class="card mb-4 shadow-sm">
+  <div class="card-body">
+
+    <div class="row">
+      <!-- English Side -->
+      <div class="col-md-6 border-end">
+        <h5>English — Question {{ pair.english.question_number }}</h5>
+        <p><strong>Type Of Question --> </strong>{{ pair.english.get_question_sub_type_display }}</p>
+
+        {% if pair.english %}
+          <p>{{ pair.english.question_part|default:pair.english.question_part_first|linebreaks }}</p>
+
+          {% if pair.english.answer_option_a %}<p>(a) {{ pair.english.answer_option_a }}</p>{% endif %}
+          {% if pair.english.answer_option_b %}<p>(b) {{ pair.english.answer_option_b }}</p>{% endif %}
+          {% if pair.english.answer_option_c %}<p>(c) {{ pair.english.answer_option_c }}</p>{% endif %}
+          {% if pair.english.answer_option_d %}<p>(d) {{ pair.english.answer_option_d }}</p>{% endif %}
+
+          <p><strong>Correct Answer:</strong> {{ pair.english.correct_answer_choice }}</p>
+          <p><strong>Solution:</strong> {{ pair.english.correct_answer_description }}</p>
+        {% else %}
+          <p class="text-muted">English version not uploaded.</p>
+        {% endif %}
+      </div>
+
+      <!-- Hindi Side -->
+      <div class="col-md-6">
+        <h5>Hindi — Question {{ pair.hindi.question_number }}</h5>
+        <p><strong>Type Of Question --> </strong>{{ pair.hindi.get_question_sub_type_display }}</p>
+
+        {% if pair.hindi %}
+          <p>{{ pair.hindi.question_part_hi|default:pair.hindi.question_part_first_hi|linebreaks }}</p>
+
+          {% if pair.hindi.answer_option_a_hi %}<p>(a) {{ pair.hindi.answer_option_a_hi }}</p>{% endif %}
+          {% if pair.hindi.answer_option_b_hi %}<p>(b) {{ pair.hindi.answer_option_b_hi }}</p>{% endif %}
+          {% if pair.hindi.answer_option_c_hi %}<p>(c) {{ pair.hindi.answer_option_c_hi }}</p>{% endif %}
+          {% if pair.hindi.answer_option_d_hi %}<p>(d) {{ pair.hindi.answer_option_d_hi }}</p>{% endif %}
+
+          <p><strong>Correct Answer:</strong> {{ pair.hindi.correct_answer_choice }}</p>
+          <p><strong>Solution:</strong> {{ pair.hindi.correct_answer_description_hi }}</p>
+        {% else %}
+          <p class="text-muted">हिंदी संस्करण उपलब्ध नहीं है।</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ✅ Common Meta Info -->
+    <div class="row mt-3">
+      <div class="col-md-6">
+        <p><strong>Marks:</strong> {{ pair.english.marks|default:"-" }}</p>
+        <p><strong>Negative Marks:</strong> {{ pair.english.negative_marks|default:"-" }}</p>
+        <p><strong>Degree of Difficulty:</strong> {{ pair.english.degree_of_difficulty|default:"-" }}</p>
+        <p><strong>Elimination Tactics Degree:</strong> {{ pair.english.elim_tactics_degree|default:"-" }}</p>
+        <p><strong>Current Relevance:</strong> {{ pair.english.current_relevance|default:"-" }}</p>
+        <p><strong>Current Relevance Topic Explanation:</strong> {{ pair.english.current_relevance_topic|default:"-" }}</p>
+        <p><strong>Evergreen Index:</strong>
+          {% for e in pair.english.evergreenindex_name.all %}{{ e.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}
+        </p>
+        <p><strong>Created At:</strong> {{ pair.english.created_at|date:"Y-m-d H:i" }}</p>
+        <p><strong>Created By:</strong> {{ pair.english.created_by }}</p>
+      </div>
+
+      <div class="col-md-6">
+        <p><strong>Area Name(s):</strong> {% for a in pair.english.area_name.all %}{{ a.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</p>
+        <p><strong>Section Name(s):</strong> {% for s in pair.english.section_name.all %}{{ s.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</p>
+        <p><strong>Part Name(s):</strong> {% for p in pair.english.part_name.all %}{{ p.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</p>
+        <p><strong>Chapter Name(s):</strong> {% for ch in pair.english.chapter_name.all %}{{ ch.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</p>
+        <p><strong>Topic Name(s):</strong> {% for t in pair.english.topic_name.all %}{{ t.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</p>
+        <p><strong>Sub-topic Name(s):</strong> {% for st in pair.english.subtopic_name.all %}{{ st.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</p>
+        <p><strong>Sub-topic Short Code(s):</strong>
+    {% for subtopic in pair.english.subtopic_name.all %}
+        {{ subtopic.sub_topic_short_Code }}{% if not forloop.last %}, {% endif %}
+    {% empty %}
+        -
+    {% endfor %}
+</p>
+        <p><strong>Exam Name(s):</strong>
+          {% for ex in pair.english.exam_name.all %}{{ ex.name }} ({{ ex.exam_code }}){% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>

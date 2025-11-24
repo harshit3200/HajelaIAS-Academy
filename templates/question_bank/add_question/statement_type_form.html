@@ -1,0 +1,520 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block custom_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+  .exam-tag-container{display:flex;flex-wrap:wrap;gap:10px;margin-top:5px}
+  .exam-tag{background:#ffeeba;color:#333;border:1px solid #f0c36d;padding:6px 12px;border-radius:20px;font-weight:500;font-size:14px;white-space:nowrap;transition:background-color .3s}
+  .exam-tag:hover{background:#ffeb99}
+  .stmt-map-table td,.stmt-map-table th{vertical-align:middle}
+</style>
+{% endblock custom_css %}
+
+{% block title %}Add Statement Type Question - Hajela's IAS Academy (HIA){% endblock %}
+
+{% block content %}
+<div class="container-xxl py-5">
+  <div class="container">
+    {% if messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {% for message in messages %}{{ message }}{% endfor %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endif %}
+
+    <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+      <h6 class="section-title bg-white text-center text-primary px-3">Add Statement Type Question</h6>
+      <h1 class="mb-5">Fill details to add a new Statement Type question</h1>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-12 wow fadeInUp" data-wow-delay="0.5s">
+        <form id="statementTypeForm" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- Question Type Switcher -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-12">
+              <h5 class="text-primary mb-3">Choose Question Type</h5>
+              <div class="mb-3">
+                <a href="{% url 'add-simple-type-question' %}" class="btn btn-outline-primary">Simple Type</a>
+                <a href="{% url 'add-r-and-a-type-question' %}" class="btn btn-outline-primary">R & A</a>
+                <a href="{% url 'add-list-type-1-question' %}" class="btn btn-outline-primary">List-I</a>
+                <a href="{% url 'add-list-type-2-question' %}" class="btn btn-outline-primary">List-II</a>
+                <a href="{% url 'add-true-and-false-type-question' %}" class="btn btn-outline-primary">True & False</a>
+                <a href="{% url 'add-fill-in-the-blank-question' %}" class="btn btn-outline-primary">Fill in the Blank</a>
+                <a href="{% url 'add-statement-type-question' %}" class="btn btn-primary">Statement</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Language + Script -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label for="language" class="form-label">Language(s)</label>
+              <select class="form-select" id="language" name="language" multiple required>
+                <option value="e">English</option>
+                <option value="h">Hindi</option>
+              </select>
+              <div class="form-text">Hold Ctrl/⌘ to select both.</div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <select class="form-select" id="script" name="script" required>
+                  <option value="">Select Script</option>
+                  <option value="Latin">Latin</option>
+                  <option value="Devanagari">Devanagari</option>
+                </select>
+                <label for="script">Script</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Question Part First -->
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Question First Part (English)</label>
+              <div class="form-floating">
+                <textarea class="form-control" name="question_part_first" id="question_part_first" placeholder="Question First Part (English)" required></textarea>
+                <label for="question_part_first">Question First Part (English)</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Question First Part (Hindi)</label>
+              <div class="form-floating">
+                <textarea class="form-control" name="question_part_first_hi" id="question_part_first_hi" placeholder="Question First Part (Hindi)" required></textarea>
+                <label for="question_part_first_hi">Question First Part (Hindi)</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statement ↔ List-II mapping table -->
+          <div class="row g-3 mt-4">
+            <div class="col-md-12">
+              <label class="form-label fw-bold text-primary">Statements (Left) mapped to List-II (Right)</label>
+              <div class="table-responsive">
+                <table class="table table-bordered align-middle stmt-map-table">
+                  <thead class="table-light">
+                  <tr>
+                    <th style="width:35%">Statement line (EN)</th>
+                    <th style="width:15%" class="text-center">:</th>
+                    <th style="width:35%">List-II item (EN)</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                    {% for i in 9|to_range %}
+                    <tr>
+                      <td><input type="text" class="form-control" name="stmt_line_row{{ i }}" placeholder="Statement line {{ i }} (English)"></td>
+                      <td class="text-center">:</td>
+                      <td><input type="text" class="form-control" name="list_2_row{{ i }}" placeholder="List-II item {{ i }} (English)"></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="table-responsive mt-3">
+                <table class="table table-bordered align-middle stmt-map-table">
+                  <thead class="table-light">
+                  <tr>
+                    <th style="width:35%">Statement line (HI)</th>
+                    <th style="width:15%" class="text-center">:</th>
+                    <th style="width:35%">List-II item (HI)</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                    {% for i in 9|to_range %}
+                    <tr>
+                      <td><input type="text" class="form-control" name="stmt_line_row{{ i }}_hi" placeholder="Statement line {{ i }} (Hindi)"></td>
+                      <td class="text-center">:</td>
+                      <td><input type="text" class="form-control" name="list_2_row{{ i }}_hi" placeholder="List-II item {{ i }} (Hindi)"></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Question Part Third -->
+          <div class="row g-3 mt-2">
+            <div class="col-md-6">
+              <label class="form-label">Question Third Part (English)</label>
+              <div class="form-floating">
+                <textarea class="form-control" name="question_part_third" id="question_part_third" placeholder="Question Third Part (English)"></textarea>
+                <label for="question_part_third">Question Third Part (English)</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Question Third Part (Hindi)</label>
+              <div class="form-floating">
+                <textarea class="form-control" name="question_part_third_hi" id="question_part_third_hi" placeholder="Question Third Part (Hindi)"></textarea>
+                <label for="question_part_third_hi">Question Third Part (Hindi)</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Options A-D -->
+          <div class="row g-3 mt-3">
+            <div class="col-md-12">
+              <label class="form-label fw-bold text-primary">Options</label>
+              {% for opt in "abcd" %}
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <input type="text" class="form-control" name="answer_option_{{ opt }}" placeholder="Option {{ opt|upper }} (English)">
+                </div>
+                <div class="col-md-6">
+                  <input type="text" class="form-control" name="answer_option_{{ opt }}_hi" placeholder="Option {{ opt|upper }} (Hindi)">
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Correct Answer & Description -->
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-floating">
+                <select class="form-select" id="correctAnswer" name="correct_answer_choice" required>
+                  <option value="">Select the correct answer</option>
+                  <option value="a">Option A</option>
+                  <option value="b">Option B</option>
+                  <option value="c">Option C</option>
+                  <option value="d">Option D</option>
+                </select>
+                <label for="correctAnswer">Correct Answer</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Answer Description</label>
+              <div class="form-floating mb-2">
+                <textarea class="form-control" id="answerDescription_en" name="correct_answer_description" placeholder="Answer Description (English)" style="height:100px"></textarea>
+                <label for="answerDescription_en">Answer Description (English)</label>
+              </div>
+              <div class="form-floating">
+                <textarea class="form-control" id="answerDescription_hi" name="correct_answer_description_hi" placeholder="Answer Description (Hindi)" style="height:100px"></textarea>
+                <label for="answerDescription_hi">Answer Description (Hindi)</label>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- Other details (same as your List-I form) -->
+          <div class="row g-3">
+            <label class="form-label">Other Details</label>
+
+            <div class="col-md-6">
+              <label class="form-label">Select Question Source</label>
+              <select class="form-select" id="questionTypeSelector" name="question_type_source" required>
+                <option value="">Select Type</option>
+                <option value="modern" {% if request.GET.question_type_source == 'modern' %}selected{% endif %}>Model (New)</option>
+                <option value="pyq" {% if request.GET.question_type_source == 'pyq' %}selected{% endif %}>PYQ</option>
+                <option value="osq" {% if request.GET.question_type_source == 'osq' %}selected{% endif %}>OSQ (Other Source Question)</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Sub Topic Short Code</label>
+              <input type="text" class="form-control" id="subTopicShortCode" name="sub_topic_short_code" placeholder="Enter Sub Topic Short Code">
+              <div class="form-text">Auto-fills hierarchy when short code matches.</div>
+            </div>
+
+            <!-- Area -->
+            <div class="col-md-6">
+              <label class="form-label">Area Name(s)</label>
+              <select id="areaName" name="area_name[]" class="form-control select2" multiple>
+                {% for area in areas %}
+                  <option value="{{ area.area_SI_Code }}">{{ area.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Section -->
+            <div class="col-md-6">
+              <label class="form-label">Section Name(s)</label>
+              <select id="sectionName" name="section_name[]" class="form-control select2" multiple></select>
+              <div class="form-text">Select area(s) first.</div>
+            </div>
+
+            <!-- Part -->
+            <div class="col-md-6">
+              <label class="form-label">Part Name(s)</label>
+              <select id="partName" name="part_name[]" class="form-control select2" multiple></select>
+            </div>
+
+            <!-- Chapter -->
+            <div class="col-md-6">
+              <label class="form-label">Chapter Name(s)</label>
+              <select id="chapterName" name="chapter_name[]" class="form-control select2" multiple></select>
+            </div>
+
+            <!-- Topic -->
+            <div class="col-md-6">
+              <label class="form-label">Topic Name(s)</label>
+              <select id="topicName" name="topic_name[]" class="form-control select2" multiple></select>
+            </div>
+
+            <!-- Subtopic -->
+            <div class="col-md-6">
+              <label class="form-label">Sub Topic Name(s)</label>
+              <select id="subTopicName" name="subtopic_name[]" class="form-control select2" multiple></select>
+              <div id="subtopicHiddenMirror"></div>
+            </div>
+
+            <!-- Exams -->
+            <div class="col-md-6">
+              <label class="form-label">Exam Name</label>
+              <select id="examName" name="exam_name[]" class="form-control select2" multiple required disabled data-preselected-exams='[]'>
+                <option value="">Select Exam</option>
+              </select>
+              <div id="relatedExamsContainer" class="exam-tag-container"></div>
+            </div>
+
+            <!-- Exam Year -->
+            <div class="col-md-6" id="examYearField" style="display:none;">
+              <div class="form-floating">
+                <input type="number" class="form-control" id="year" name="exam_year" placeholder="Year">
+                <label for="year">Year</label>
+              </div>
+            </div>
+
+            <!-- Marks / Neg marks / Degrees / Relevance -->
+            <div class="col-md-6">
+              <label class="form-label">Marks</label>
+              <div class="form-floating">
+                <select class="form-select" id="marks" name="marks" required>
+                  <option value="">Select Marks</option>
+                  <option value="0.5">0.5</option><option value="1.0">1.0</option>
+                  <option value="1.5">1.5</option><option value="2.0">2.0</option>
+                  <option value="2.5">2.5</option><option value="3.0">3.0</option>
+                </select>
+                <label for="marks">Marks</label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Negative Marks</label>
+              <div class="form-floating">
+                <select class="form-select" id="negativeMarks" name="negative_marks" required>
+                  <option value="">Select Negative Marks</option>
+                  <option value="1.0">1.0</option><option value="0.5">0.5</option>
+                  <option value="0.33">0.33</option><option value="0.25">0.25</option>
+                  <option value="0.2">0.2</option><option value="0">0</option>
+                </select>
+                <label for="negativeMarks">Negative Marks</label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Degree of Difficulty</label>
+              <div class="form-floating">
+                <select class="form-select" id="degreeOfDifficulty" name="degree_of_difficulty" required>
+                  <option value="">Select Degree of Difficulty</option>
+                  {% for i in 5|to_range %}
+                    <option value="{{ i }}">{{ i }}</option>
+                  {% endfor %}
+                </select>
+                <label for="degreeOfDifficulty">Degree of Difficulty</label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Elimination Tactics</label>
+              <div class="form-floating">
+                <select class="form-select" id="elimTacticsDegree" name="elim_tactics_degree" required>
+                  <option value="">Select Elimination Tactics</option>
+                  {% for i in 5|to_range %}
+                    <option value="{{ i }}">{{ i }}</option>
+                  {% endfor %}
+                </select>
+                <label for="elimTacticsDegree">Elimination Tactics</label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Current Relevance</label>
+              <div class="form-floating">
+                <select class="form-select" id="currentRelevance" name="current_relevance" required>
+                  <option value="">Select Current Relevance</option>
+                  <option value="0">0 - Not Relevant</option>
+                  <option value="1">1 - Moderately Relevant</option>
+                  <option value="2">2 - Very Relevant</option>
+                </select>
+                <label for="currentRelevance">Current Relevance</label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Current Relevance Topic Explanation</label>
+              <div class="form-floating">
+                <textarea class="form-control" id="currentRelevanceTopic" name="current_relevance_topic" placeholder="Current Relevance Topic Explanation"></textarea>
+                <label for="currentRelevanceTopic">Explanation</label>
+              </div>
+            </div>
+
+            <div class="col-12 mt-3">
+              <button class="btn btn-primary w-100 py-3" type="submit">Submit Question</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock content %}
+
+{% block custom_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(function(){
+  let questionTypeSource = $('#questionTypeSelector').val() || '';
+
+  // Select2
+  $('#areaName,#sectionName,#partName,#chapterName,#topicName,#subTopicName,#examName,#language,#elimTacticsDegree,#currentRelevance').select2({placeholder:" ",allowClear:true});
+  disableDropdowns(['#sectionName','#partName','#chapterName','#topicName','#subTopicName','#examName']);
+
+  // Mirror subtopic legacy name
+  function syncSubtopicHiddenMirror(){
+    const $m = $('#subtopicHiddenMirror'); $m.empty();
+    (($('#subTopicName').val()||[]).map(String)).forEach(v=>{
+      $m.append($('<input>',{type:'hidden',name:'sub_topic_name[]',value:v}));
+    });
+  }
+
+  $('#questionTypeSelector').on('change', function(){ questionTypeSource=$(this).val(); resetAllDropdowns(); });
+
+  // Shortcode autofill
+  $('#subTopicShortCode').on('blur', async function(){
+    const raw=$(this).val().trim(); if(!raw) return;
+    questionTypeSource = $('#questionTypeSelector').val() || '';
+    if(!questionTypeSource){ alert("Please select 'Select Question Source' first."); return; }
+    const codes = raw.split(/[\s,]+/).filter(Boolean);
+    const query = codes.map(c=>`codes[]=${encodeURIComponent(c)}`).join('&');
+    try{
+      const res = await fetch(`/question-bank/get-hierarchy-from-shortcode/?${query}`);
+      const payload = await res.json();
+      if(payload.status!=='success'){ alert('Invalid shortcode(s).'); resetAllDropdowns(); return; }
+      const d = payload.data;
+
+      setDropdownValues('#areaName', d.area_ids); $('#areaName').trigger('change');
+      if(questionTypeSource==='modern'){
+        $('#sectionName').html('<option value="no_section" selected>No Section</option>').prop('disabled',true).trigger('change');
+        await fetchDropdownData('#partName','/question-bank/get-parts-by-area/', d.area_ids, 'area_ids');
+      }else{
+        await fetchDropdownData('#sectionName','/question-bank/get-sections-list/', d.area_ids, 'area_ids');
+        setDropdownValues('#sectionName', d.section_ids); $('#sectionName').prop('disabled',false).trigger('change');
+        await fetchDropdownData('#partName','/question-bank/get-parts-list/', d.section_ids, 'section_ids');
+      }
+      setDropdownValues('#partName', d.part_ids); $('#partName').prop('disabled',false).trigger('change');
+
+      await fetchDropdownData('#chapterName','/question-bank/get-chapters-list/', d.part_ids, 'part_ids');
+      setDropdownValues('#chapterName', d.chapter_ids); $('#chapterName').prop('disabled',false).trigger('change');
+
+      await fetchDropdownData('#topicName','/question-bank/get-topics-list/', d.chapter_ids, 'chapter_ids');
+      setDropdownValues('#topicName', d.topic_ids); $('#topicName').prop('disabled',false).trigger('change');
+
+      await fetchDropdownData('#subTopicName','/question-bank/get-subtopics-list/', d.topic_ids, 'topic_ids');
+      setDropdownValues('#subTopicName', d.subtopic_ids); $('#subTopicName').prop('disabled',false).trigger('change');
+
+      syncSubtopicHiddenMirror();
+      $('#subTopicName').trigger('change');
+    }catch(err){ console.error(err); alert("Failed to fetch data from shortcode."); resetAllDropdowns(); }
+  });
+
+  // Cascades
+  $('#areaName').on('change', async function(){
+    const ids = ($(this).val()||[]).map(String);
+    resetDropdowns(['#sectionName','#partName','#chapterName','#topicName','#subTopicName','#examName']);
+    if(ids.length){
+      if(questionTypeSource==='modern'){
+        $('#sectionName').html('<option value="no_section" selected>No Section</option>').prop('disabled',true).trigger('change');
+        await fetchDropdownData('#partName','/question-bank/get-parts-by-area/', ids, 'area_ids'); enableDropdown('#partName');
+      }else{
+        await fetchDropdownData('#sectionName','/question-bank/get-sections-list/', ids, 'area_ids'); enableDropdown('#sectionName');
+      }
+    }
+  });
+
+  $('#sectionName').on('change', async function(){
+    if(questionTypeSource==='modern') return;
+    const ids = ($(this).val()||[]).map(String);
+    if(ids.length){ await fetchDropdownData('#partName','/question-bank/get-parts-list/', ids, 'section_ids'); enableDropdown('#partName'); }
+    else{ resetDropdowns(['#partName','#chapterName','#topicName','#subTopicName','#examName']); }
+  });
+
+  $('#partName').on('change', async function(){
+    const ids = ($(this).val()||[]).map(String);
+    if(ids.length){ await fetchDropdownData('#chapterName','/question-bank/get-chapters-list/', ids, 'part_ids'); enableDropdown('#chapterName'); }
+    else{ resetDropdowns(['#chapterName','#topicName','#subTopicName','#examName']); }
+  });
+
+  $('#chapterName').on('change', async function(){
+    const ids = ($(this).val()||[]).map(String);
+    if(ids.length){ await fetchDropdownData('#topicName','/question-bank/get-topics-list/', ids, 'chapter_ids'); enableDropdown('#topicName'); }
+    else{ resetDropdowns(['#topicName','#subTopicName','#examName']); }
+  });
+
+  $('#topicName').on('change', async function(){
+    const ids = ($(this).val()||[]).map(String);
+    if(ids.length){ await fetchDropdownData('#subTopicName','/question-bank/get-subtopics-list/', ids, 'topic_ids'); enableDropdown('#subTopicName'); }
+    else{ resetDropdowns(['#subTopicName','#examName']); }
+  });
+
+  // Preselected subtopics -> exams
+  (function(){
+    const vals = ($('#subTopicName').val()||[]).map(String);
+    if(vals.length){ syncSubtopicHiddenMirror(); $('#subTopicName').trigger('change'); }
+  })();
+
+  // Load exams when subtopic changes
+  $('#subTopicName').on('change', async function(){
+    syncSubtopicHiddenMirror();
+    const ids = ($(this).val()||[]).map(String);
+    const $exam = $('#examName'); const $tags = $('#relatedExamsContainer');
+    if(ids.length){
+      try{
+        const query = ids.map(id=>`subtopic_ids[]=${encodeURIComponent(id)}`).join('&');
+        const res = await fetch(`/question-bank/get-exams-list/?${query}`);
+        const data = await res.json();
+        const relatedIds = new Set((data.related_exams||[]).map(e=>String(e.exam_SI_Number)));
+        let pre = []; try{ pre = JSON.parse($exam.attr('data-preselected-exams')||'[]').map(String);}catch(e){}
+        $exam.empty().append(`<option value="">Select Exam</option>`);
+        (data.all_exams||[]).forEach(ex=>{
+          const v=String(ex.exam_SI_Number), label=`${ex.name}${ex.exam_code?' ('+ex.exam_code+')':''}`;
+          const $o=$('<option>').val(v).text(label);
+          if(relatedIds.has(v) || pre.includes(v)) $o.prop('selected',true);
+          if(relatedIds.has(v)) $o.attr('data-related','1');
+          $exam.append($o);
+        });
+        $exam.prop('disabled',false).trigger('change');
+        $tags.empty();
+        (data.related_exams||[]).forEach(ex=>{
+          $tags.append($('<div>').addClass('exam-tag').text(ex.exam_code? `${ex.name} (${ex.exam_code})` : ex.name));
+        });
+      }catch(err){ console.error(err); resetDropdown('#examName','Select Exam'); $tags.empty(); }
+    }else{ resetDropdown('#examName','Select Exam'); $tags.empty(); }
+  });
+
+  // On submit, enable selects and mirror legacy
+  $('#statementTypeForm').on('submit', function(){
+    $('#sectionName,#partName,#chapterName,#topicName,#subTopicName,#examName').prop('disabled',false);
+    syncSubtopicHiddenMirror();
+  });
+
+  // Helpers
+  async function fetchDropdownData(sel,url,ids,param){const q=ids.map(id=>`${param}[]=${encodeURIComponent(id)}`).join('&');const r=await fetch(`${url}?${q}`);const d=await r.json();const k=Object.keys(d)[0];if(Array.isArray(d[k])&&d[k].length){populateDropdown(sel,d[k]);}else{resetDropdown(sel,'No data available');}}
+  function populateDropdown(sel,items){const $s=$(sel);$s.empty().append(`<option value="">Select ${$s.attr('id')}</option>`);const idKey=Object.keys(items[0]).find(k=>['area_SI_Code','section_Unit_SI','part_serial','chapter_number','topic_SI_number','sub_topic_SI_Number','exam_SI_Number','id'].includes(k));items.forEach(it=>$s.append(`<option value="${it[idKey]}">${it.name}</option>`));$s.trigger('change');}
+  function setDropdownValues(sel,vals){$(sel).val(vals).trigger('change');}
+  function resetDropdowns(sels){sels.forEach(s=>resetDropdown(s,`Select ${cap($(s).attr('id')||'Option')}`));}
+  function resetDropdown(s,ph){$(s).empty().append(`<option value="">${ph}</option>`).prop('disabled',true).trigger('change');}
+  function resetAllDropdowns(){resetDropdowns(['#sectionName','#partName','#chapterName','#topicName','#subTopicName','#examName']);}
+  function enableDropdown(s){$(s).prop('disabled',false);}
+  function disableDropdowns(sels){sels.forEach(s=>$(s).prop('disabled',true));}
+  function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+});
+</script>
+{% endblock custom_js %}

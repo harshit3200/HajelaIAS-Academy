@@ -1,0 +1,85 @@
+<div class="row g-3 mb-4">
+
+    <!-- Question Source -->
+    <div class="col-md-6 mb-4">
+        <label for="questionTypeSelector" class="form-label">Select Question Source</label>
+        <select class="form-select" id="questionTypeSelector" name="question_type_source" required>
+            <option value="">Select Type</option>
+            <option value="modern" {% if english_q.question_type_source == 'modern' %}selected{% endif %}>Model (New)</option>
+            <option value="pyq" {% if english_q.question_type_source == 'pyq' %}selected{% endif %}>PYQ</option>
+        </select>
+    </div>
+
+    <!-- New or PYQs -->
+    <div class="col-md-6">
+        <div class="form-floating">
+            <select class="form-select" id="newOrPyq" name="new_or_pyq" required>
+                <option value="">Select New or PYQs</option>
+                <option value="new" {% if english_q.new_or_pyq == 'new' %}selected{% endif %}>New</option>
+                <option value="pyq" {% if english_q.new_or_pyq == 'pyq' %}selected{% endif %}>PYQs</option>
+            </select>
+            <label for="newOrPyq">New or PYQs</label>
+        </div>
+    </div>
+
+    <!-- Exam Year -->
+    <div class="col-md-6 examYearFieldContainer" id="examYearField" {% if english_q.new_or_pyq != 'pyq' %}style="display:none;"{% endif %}>
+        <div class="form-floating">
+            <input type="number" class="form-control" id="year" name="exam_year" placeholder="Year" value="{{ english_q.exam_year }}">
+            <label for="year">Year</label>
+        </div>
+    </div>
+
+    <!-- Marks -->
+    <div class="col-md-6">
+        <div class="form-floating">
+            <select class="form-select" id="marks" name="marks" required>
+                <option value="">Select Marks</option>
+                {% for mark in "0.5 1.0 1.5 2.0 2.5 3.0"|cut:" " %}
+                    <option value="{{ mark }}" {% if english_q.marks|stringformat:"s" == mark %}selected{% endif %}>{{ mark }}</option>
+                {% endfor %}
+            </select>
+            <label for="marks">Marks</label>
+        </div>
+    </div>
+
+    <!-- Negative Marks -->
+    <div class="col-md-6">
+        <div class="form-floating">
+            <select class="form-select" id="negativeMarks" name="negative_marks" required>
+                <option value="">Select Negative Marks</option>
+                {% for neg in "1.0 0.5 0.33 0.25 0.2 0"|cut:" " %}
+                    <option value="{{ neg }}" {% if english_q.negative_marks|stringformat:"s" == neg %}selected{% endif %}>{{ neg }}</option>
+                {% endfor %}
+            </select>
+            <label for="negativeMarks">Negative Marks</label>
+        </div>
+    </div>
+
+    <!-- Degree of Difficulty -->
+    <div class="col-md-6">
+        <div class="form-floating">
+            <select class="form-select" id="degreeOfDifficulty" name="degree_of_difficulty" required>
+                <option value="">Select Degree of Difficulty</option>
+                {% for i in "1 2 3 4 5 6 7 8 9 10"|cut:" " %}
+                    <option value="{{ i }}" {% if english_q.degree_of_difficulty|stringformat:"s" == i|stringformat:"s" %}selected{% endif %}>{{ i }}</option>
+                {% endfor %}
+            </select>
+            <label for="degreeOfDifficulty">Degree of Difficulty</label>
+        </div>
+    </div>
+
+    <!-- Evergreen Index -->
+    <div class="col-md-6">
+        <div class="form-floating">
+            <select class="form-select" id="evergreenIndex" name="evergreen_index" required>
+                <option value="">Select Evergreen Index</option>
+                {% for i in "1 2 3 4 5 6 7 8 9 10"|cut:" " %}
+                    <option value="{{ i }}" {% if english_q.evergreen_index|stringformat:"s" == i|stringformat:"s" %}selected{% endif %}>{{ i }}</option>
+                {% endfor %}
+            </select>
+            <label for="evergreenIndex">Evergreen Index</label>
+        </div>
+    </div>
+
+</div>

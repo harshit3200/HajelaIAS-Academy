@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Header Start -->
+<div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 text-center">
+                <h1 class="display-3 text-white animated slideInDown">Dashboard</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item"><a class="text-white" href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a class="text-white" href="#">Question Bank</a></li>
+                        <li class="breadcrumb-item text-white active" aria-current="page">Dashboard</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Header End -->
+
+<!-- Dashboard Content Start -->
+<div class="container-xxl py-5">
+    {% include "includes/message_alert.html" %}
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Reports</h6>
+            <h1 class="mb-5">Reports Overview</h1>
+        </div>
+        <!-- Legend for Color Coding -->
+        <div class="mb-4">
+            <h4>Color Legend:</h4>
+            <ul class="list-unstyled">
+                <li><span class="badge bg-danger">&nbsp;&nbsp;&nbsp;&nbsp;</span> <strong>Red:</strong> Minimal or zero data added</li>
+                <li><span class="badge bg-success">&nbsp;&nbsp;&nbsp;&nbsp;</span> <strong>Green:</strong> High data added (maximum)</li>
+                <li><span class="badge bg-warning">&nbsp;&nbsp;&nbsp;&nbsp;</span> <strong>Yellow:</strong> Below average data added</li>
+                <li><span class="badge bg-primary">&nbsp;&nbsp;&nbsp;&nbsp;</span> <strong>Blue:</strong> Average data added</li>
+            </ul>
+        </div>
+        <!-- This Week's Reports Section -->
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>This Week's Reports</h3>
+            <a href="{% url 'generate_this_week_csv' %}" class="btn btn-primary">Generate CSV Report</a>
+        </div>
+        <p><strong>Last Generated:</strong> {% if this_week_generated_date %} {{ this_weesk_generated_date|date:"d M Y - h:i:s A" }} {% else %} (not generated yet) {% endif %}</p>
+
+        <div class="table-responsive">
+            {% if this_week_report_data %}
+            <table class="table table-bordered table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Sr. No.</th>
+                        <th>Email</th>
+                        <th>User Name</th>
+                        <th>No. of Questions Uploaded</th>
+                        <th>No. of Phrases/Idioms/Quotes</th>
+                        <th>No. of Input Suggestions</th>
+                        <th>Simple Type</th>
+                        <th>List I Type</th>
+                        <th>List II Type</th>
+                        <th>R & A Type</th>
+                        <th>True & False</th>
+                        <th>Fill in the Blank</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in this_week_report_data %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ report.user.email }}</td>
+                        <td>{{ report.user.first_name }} {{ report.user.last_name }}</td>
+                        
+                        <!-- Apply conditional colors for No. of Questions Uploaded -->
+                        <td class="{% if report.total_questions == report.max_questions %} table-success {% elif report.total_questions == report.min_questions %} table-danger {% elif report.total_questions < report.avg_questions %} table-warning {% else %} table-primary {% endif %}">
+                            {{ report.total_questions }}
+                        </td>
+
+                        <!-- Apply conditional colors for No. of Phrases -->
+                        <td class="{% if report.total_phrases == 0 %} table-danger {% elif report.total_phrases > 10 %} table-success {% else %} table-warning {% endif %}">
+                            {{ report.total_phrases }}
+                        </td>
+
+                        <!-- Apply conditional colors for No. of Input Suggestions -->
+                        <td class="{% if report.total_suggestions == 0 %} table-danger {% elif report.total_suggestions > 5 %} table-success {% else %} table-warning {% endif %}">
+                            {{ report.total_suggestions }}
+                        </td>
+
+                        <td>{{ report.simple_type_count }}</td>
+                        <td>{{ report.list_1_type_count }}</td>
+                        <td>{{ report.list_2_type_count }}</td>
+                        <td>{{ report.ra_type_count }}</td>
+                        <td>{{ report.true_false_type_count }}</td>
+                        <td>{{ report.fill_blank_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No data for this week's report.</p>
+            {% endif %}
+        </div>
+
+        <hr>
+
+        <!-- Earlier Week's Reports Section -->
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>Earlier Week's Reports</h3>
+            <a href="{% url 'generate_earlier_week_csv' %}" class="btn btn-primary">Generate CSV Report</a>
+        </div>
+        <p><strong>Last Generated:</strong> {% if earlier_week_generated_date %} {{ earlier_week_generated_date|date:"d M Y - h:i:s A" }} {% else %} (not generated yet) {% endif %}</p>
+
+        <div class="table-responsive">
+            {% if earlier_week_report_data %}
+            <table class="table table-bordered table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Sr. No.</th>
+                        <th>Email</th>
+                        <th>User Name</th>
+                        <th>No. of Questions Uploaded</th>
+                        <th>No. of Phrases/Idioms/Quotes</th>
+                        <th>No. of Input Suggestions</th>
+                        <th>Simple Type</th>
+                        <th>List I Type</th>
+                        <th>List II Type</th>
+                        <th>R & A Type</th>
+                        <th>True & False</th>
+                        <th>Fill in the Blank</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in earlier_week_report_data %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ report.user.email }}</td>
+                        <td>{{ report.user.first_name }} {{ report.user.last_name }}</td>
+
+                        <!-- Apply conditional colors for No. of Questions Uploaded -->
+                        <td class="{% if report.total_questions == report.max_questions %} table-success {% elif report.total_questions == report.min_questions %} table-danger {% elif report.total_questions < report.avg_questions %} table-warning {% else %} table-primary {% endif %}">
+                            {{ report.total_questions }}
+                        </td>
+
+                        <!-- Apply conditional colors for No. of Phrases -->
+                        <td class="{% if report.total_phrases == 0 %} table-danger {% elif report.total_phrases > 10 %} table-success {% else %} table-warning {% endif %}">
+                            {{ report.total_phrases }}
+                        </td>
+
+                        <!-- Apply conditional colors for No. of Input Suggestions -->
+                        <td class="{% if report.total_suggestions == 0 %} table-danger {% elif report.total_suggestions > 5 %} table-success {% else %} table-warning {% endif %}">
+                            {{ report.total_suggestions }}
+                        </td>
+
+                        <td>{{ report.simple_type_count }}</td>
+                        <td>{{ report.list_1_type_count }}</td>
+                        <td>{{ report.list_2_type_count }}</td>
+                        <td>{{ report.ra_type_count }}</td>
+                        <td>{{ report.true_false_type_count }}</td>
+                        <td>{{ report.fill_blank_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No data for earlier week's report.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+<!-- Dashboard Content End -->
+
+{% endblock %}
+

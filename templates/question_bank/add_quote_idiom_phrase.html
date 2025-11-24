@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block custom_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock custom_css %}
+
+{% block content %}
+<div class="container-xxl py-5">
+    <div class="container">
+        {% if messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Add Quote, Idiom, or Phrase</h6>
+            <h1 class="mb-5">Fill in the details to add a new entry</h1>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-12 wow fadeInUp" data-wow-delay="0.5s">
+                <form id="addQuoteIdiomPhraseForm" method="POST">
+                    {% csrf_token %}
+
+                    <!-- Type Field -->
+                    <div class="row g-3">
+                        <div class="col-md-12 mb-3">
+                            <label for="type" class="form-label">Choose Type</label>
+                            <select class="form-select" id="type" name="type" required>
+                                <option value="">Select Type</option>
+                                <option value="quote">Quote</option>
+                                <option value="idiom">Idiom</option>
+                                <option value="phrase">Phrase</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Content Field -->
+                    <div class="row g-3">
+                        <div class="col-md-12 mb-3">
+                            <label for="content" class="form-label">Content</label>
+                            <textarea class="form-control" name="content" id="content" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Author Field -->
+                    <div class="row g-3">
+                        <div class="col-md-12 mb-3">
+                            <label for="author" class="form-label">Author (Optional)</label>
+                            <input type="text" class="form-control" name="author" id="author" placeholder="Enter author or source (optional)">
+                        </div>
+                    </div>
+
+                    <!-- Meaning Field (Shown only for idioms or phrases) -->
+                    <div class="row g-3" id="meaningField" style="display: none;">
+                        <div class="col-md-12 mb-3">
+                            <label for="meaning" class="form-label">Meaning</label>
+                            <textarea class="form-control" name="meaning" id="meaning" placeholder="Enter the meaning of the idiom or phrase"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Exam, Subject, Area, etc. -->
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-4">
+                            <label for="examName" class="form-label">Exam Name(s)</label>
+                            <select class="form-select" id="examName" name="exam_name[]" multiple="multiple" required>
+                                {% for exam in exam_names %}
+                                    <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <label for="subjectName" class="form-label">Subject Name(s)</label>
+                            <select class="form-select" id="subjectName" name="subject_name[]" multiple="multiple"></select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <label for="areaName" class="form-label">Area Name(s)</label>
+                            <select class="form-select" id="areaName" name="area_name[]" multiple="multiple"></select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <label for="partName" class="form-label">Part Name(s)</label>
+                            <select class="form-select" id="partName" name="part_name[]" multiple="multiple"></select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <label for="chapterName" class="form-label">Chapter Name(s)</label>
+                            <select class="form-select" id="chapterName" name="chapter_name[]" multiple="multiple"></select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <label for="topicName" class="form-label">Topic Name(s)</label>
+                            <select class="form-select" id="topicName" name="topic_name[]" multiple="multiple"></select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4" id="manual_topic" style="display: none;">
+                            <input type="text" class="form-control" name="new_topic_name" id="new_topic_name" placeholder="Enter new topic">
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <button class="btn btn-primary w-100 py-3" type="submit">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block custom_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#examName, #subjectName, #areaName, #partName, #chapterName, #topicName').select2({
+            placeholder: "Select or search",
+            allowClear: true
+        });
+
+        // Show or hide the meaning field based on the selected type
+        $('#type').on('change', function() {
+            var type = $(this).val();
+            if (type === 'idiom' || type === 'phrase') {
+                $('#meaningField').show();
+            } else {
+                $('#meaningField').hide();
+            }
+        });
+
+        // Handle Exam Name selection
+        $('#examName').on('change', function() {
+            let examIds = $(this).val();
+            let queryString = examIds.map(id => `exam_ids[]=${id}`).join('&');
+            
+            fetch(`/question-bank/get-subjects-list/?${queryString}`)
+                .then(response => response.json())
+                .then(data => {
+                    let subjectSelect = $('#subjectName');
+                    subjectSelect.empty().append('<option value="">Select Subject Name</option>');
+                    data.subjects.forEach(subject => {
+                        subjectSelect.append(`<option value="${subject.id}">${subject.name}</option>`);
+                    });
+                    subjectSelect.trigger('change');
+                });
+        });
+
+        // Handle Subject Name selection to fetch Area Name(s)
+        $('#subjectName').on('change', function() {
+            let subjectIds = $(this).val();
+            let queryString = subjectIds.map(id => `subject_ids[]=${id}`).join('&');
+            
+            fetch(`/question-bank/get-areas-list/?${queryString}`)
+                .then(response => response.json())
+                .then(data => {
+                    let areaSelect = $('#areaName');
+                    areaSelect.empty().append('<option value="">Select Area Name</option>');
+                    data.areas.forEach(area => {
+                        areaSelect.append(`<option value="${area.id}">${area.name}</option>`);
+                    });
+                    areaSelect.trigger('change');
+                });
+        });
+
+        // Handle Area Name selection to fetch Part Name(s)
+        $('#areaName').on('change', function() {
+            let areaIds = $(this).val();
+            let queryString = areaIds.map(id => `area_ids[]=${id}`).join('&');
+            
+            fetch(`/question-bank/get-parts-list/?${queryString}`)
+                .then(response => response.json())
+                .then(data => {
+                    let partSelect = $('#partName');
+                    partSelect.empty().append('<option value="">Select Part Name</option>');
+                    data.parts.forEach(part => {
+                        partSelect.append(`<option value="${part.id}">${part.name}</option>`);
+                    });
+                    partSelect.trigger('change');
+                });
+        });
+
+        // Handle Part Name selection to fetch Chapter Name(s)
+        $('#partName').on('change', function() {
+            let partIds = $(this).val();
+            let queryString = partIds.map(id => `part_ids[]=${id}`).join('&');
+            
+            fetch(`/question-bank/get-chapters-list/?${queryString}`)
+                .then(response => response.json())
+                .then(data => {
+                    let chapterSelect = $('#chapterName');
+                    chapterSelect.empty().append('<option value="">Select Chapter Name</option>');
+                    data.chapters.forEach(chapter => {
+                        chapterSelect.append(`<option value="${chapter.id}">${chapter.name}</option>`);
+                    });
+                    chapterSelect.trigger('change');
+                });
+        });
+
+        // Handle Chapter Name selection to fetch Topic Name(s)
+        $('#chapterName').on('change', function() {
+            let chapterIds = $(this).val();
+            let queryString = chapterIds.map(id => `chapter_ids[]=${id}`).join('&');
+            
+            fetch(`/question-bank/get-topics-list/?${queryString}`)
+                .then(response => response.json())
+                .then(data => {
+                    let topicSelect = $('#topicName');
+                    topicSelect.empty().append('<option value="">Select Topic Name</option>');
+                    data.topics.forEach(topic => {
+                        topicSelect.append(`<option value="${topic.id}">${topic.name}</option>`);
+                    });
+                    topicSelect.append('<option value="other">Other (Add manually)</option>');
+                });
+        });
+
+        // Show "Add manually" input when "Other" is selected
+        $('#topicName').on('change', function() {
+            let selectedValues = $(this).val();
+            if (selectedValues && selectedValues.includes('other')) {
+                $('#manual_topic').show();
+            } else {
+                $('#manual_topic').hide();
+            }
+        });
+    });
+</script>
+{% endblock custom_js %}

@@ -1,0 +1,661 @@
+{% load custom_tags %}
+<style>
+/* ---------- Base Layout ---------- */
+body{background:#f8f9fa;font-family:"Inter",sans-serif;}
+.result-section{background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:25px;}
+.result-header{background:linear-gradient(90deg,#010f1f,#403e7b);color:#fff;padding:10px 15px;border-radius:8px 8px 0 0;
+  font-weight:600;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.legend-container{display:flex;gap:10px;font-size:.85rem}
+.legend-pill{display:inline-flex;align-items:center;gap:6px}
+.legend-pill span{display:inline-block;width:14px;height:14px;border-radius:3px}
+
+/* ---------- Headings ---------- */
+.header-en{background:linear-gradient(90deg,#1a237e,#3949ab);color:#fff;padding:6px 10px;border-radius:6px;font-weight:600}
+.header-hi{background:linear-gradient(90deg,#1b5e20,#43a047);color:#fff;padding:6px 10px;border-radius:6px;font-weight:600}
+
+/* ---------- Text areas ---------- */
+.ai-textarea-en,.ai-textarea-hi{background:#000;color:#fff;height:260px;font-family:"Roboto Mono",monospace;border-radius:8px}
+
+/* ---------- Keywords ---------- */
+.keyword-badge{
+  display:inline-flex;align-items:center;margin:3px 4px;padding:4px 8px;border-radius:12px;
+  font-size:.82rem;cursor:pointer;transition:.2s;color:#fff;
+}
+.keyword-badge:hover{opacity:.9;transform:scale(1.05)}
+.keyword-remove{margin-left:5px;font-weight:bold;color:#000000;cursor:pointer}
+.keyword-remove:hover{color:#ffc107}
+
+.keyword-badge {
+  border-radius: 18px;
+  font-weight: 500;
+  font-size: 0.83rem;
+  margin: 3px 5px;
+  padding: 6px 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+/* ---------- Subtopics ---------- */
+.subtopic-chip{display:inline-block;padding:6px 10px;margin:4px;border-radius:18px;font-size:.83rem;font-weight:500;color:#000;transition:.4s;}
+.reason-box{background:#f8f9fa;padding:6px 10px;border-radius:6px;margin-top:4px;font-size:.82rem}
+
+/* ---------- Glow Animation ---------- */
+@keyframes glowHighlight {
+  0% { box-shadow:0 0 0px rgba(0,255,0,0); background-color:inherit; }
+  50% { box-shadow:0 0 12px rgba(72,239,128,0.8); background-color:#d4edda; }
+  100% { box-shadow:0 0 0px rgba(0,255,0,0); background-color:inherit; }
+}
+.subtopic-glow { animation:glowHighlight 1.5s ease-in-out; }
+
+/* ---------- Refinement ---------- */
+.refine-section{background:#f3f6ff;border-left:4px solid #0d6efd;padding:10px;border-radius:8px;margin-top:10px}
+.scope-btn{margin:2px}
+.refined-results{background:#eef9f1;border-left:4px solid #28a745;padding:10px;border-radius:8px;margin-top:10px}
+
+/* ---------- Buttons ---------- */
+.btn-save-final{margin-top:15px;font-weight:600;position:relative}
+.btn-save-final.loading::after{content:"";position:absolute;right:12px;top:50%;width:14px;height:14px;
+  border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;animation:spin .8s linear infinite;
+  transform:translateY(-50%)}
+@keyframes spin{from{transform:translateY(-50%) rotate(0)}to{transform:translateY(-50%) rotate(360deg)}}
+
+/* ---------- Toast ---------- */
+.toast{position:fixed;bottom:25px;right:25px;background:#333;color:#fff;padding:10px 16px;border-radius:8px;font-size:.9rem;
+  display:none;z-index:9999}
+.toast.success{background:#28a745}.toast.error{background:#dc3545}
+</style>
+
+<div id="toast" class="toast"></div>
+<input type="hidden" id="globalCsrf" value="{{ csrf_token }}">
+
+<div class="col-lg-12" id="ai-generated-section">
+  <div class="result-section">
+    <div class="result-header">
+      <span>🤖 AI Generated & Logical Multi-Subtopic Tagging</span>
+      <div class="legend-container">
+        <div class="legend-pill"><span style="background:#1fa83b"></span>AI Keywords</div>
+        <div class="legend-pill"><span style="background:#ff8c00"></span>DB Keywords</div>
+      </div>
+    </div>
+
+    <form id="ai-question-form">
+      {% csrf_token %}
+      <input type="hidden" name="original_question_id" value="{{ question_id }}">
+
+      <div class="container-fluid">
+        {% for pair in paired_blocks %}
+        <div class="row mb-4 single-pair" data-pair-index="{{ forloop.counter }}">
+          <div class="d-flex flex-wrap gap-3">
+            
+            <!-- Combined EN + HI Section -->
+            <div class="result-section flex-fill border border-primary rounded p-3 lang-card">
+              <div class="header-en mb-2">🇬🇧 Question (EN) #{{ forloop.counter }}</div>
+              <textarea class="form-control ai-textarea-en" readonly>{{ pair.english }}</textarea>
+
+              <div class="header-hi my-2">🇮🇳 प्रश्न (HI)</div>
+              <textarea class="form-control ai-textarea-hi" readonly>{{ pair.hindi }}</textarea>
+
+{% for st in pair.matched_subtopics %}
+  <div class="mt-4 p-3 rounded shadow-sm"
+       style="background:{{ st.area_color|default:'#f6f6f6' }}1a; border-left:6px solid {{ st.area_color|default:'#999' }};">
+       
+    <div class="fw-bold mb-2">
+      <span style="color:{{ st.area_color|default:'#444' }}">
+        📘 {{ st.area }} → {{ st.subtopic }}
+      </span>
+      <small class="text-muted">
+        (Confidence: {{ st.confidence|floatformat:2 }})
+      </small>
+    </div>
+
+<!-- English Keywords -->
+<div class="mb-2 keyword-display-en">
+  {% if st.keywords_en %}
+    {% for kw in st.keywords_en|split:"," %}
+      {% if kw %}
+        <span class="keyword-badge"
+              style="background:{{ st.area_color|default:'#1fa83b' }}33;
+                     border:1px solid {{ st.area_color|default:'#1fa83b' }};
+                     color:#000000;">
+          {{ kw|trim }}
+          <span class="keyword-remove">×</span>
+        </span>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    <span class="text-muted small">No English keywords</span>
+  {% endif %}
+</div>
+
+<!-- Hindi Keywords -->
+<div class="keyword-display-hi mb-2">
+  {% if st.keywords_hi %}
+    {% for kw in st.keywords_hi|split:"," %}
+      {% if kw %}
+        <span class="keyword-badge"
+              style="background:{{ st.area_color|default:'#ff8c00' }}33;
+                     border:1px solid {{ st.area_color|default:'#ff8c00' }};
+                     color:#000000;">
+          {{ kw|trim }}
+          <span class="keyword-remove">×</span>
+        </span>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    <span class="text-muted small">कोई हिंदी कीवर्ड नहीं</span>
+  {% endif %}
+</div>
+
+<!-- 🟧 DB Keywords Block -->
+<div class="keyword-display-db mb-2">
+  <label class="small text-warning fw-bold">DB Keywords:</label><br>
+  {% if st.db_keywords %}
+    {% for kw in st.db_keywords|split:"," %}
+      {% if kw %}
+        <span class="keyword-badge"
+              style="background:#fff3cd;border:1px solid #ffc107;color:#000;">
+          {{ kw|trim }}
+        </span>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    <span class="text-muted small">No DB keywords found</span>
+  {% endif %}
+</div>
+
+  </div>
+{% endfor %}
+
+<!-- 🟡 General / Unmapped Keywords -->
+{% if pair.general_keywords.english or pair.general_keywords.hindi %}
+  <div class="mt-4 p-3 rounded shadow-sm border border-warning" style="background:#fffbea;">
+    <div class="fw-bold text-warning mb-2">⚙️ General / Unmapped Keywords (Not Linked to Any Subtopic)</div>
+
+    {% if pair.general_keywords.english %}
+      <div class="keyword-display-en mb-2">
+        {% for kw in pair.general_keywords.english|split:"," %}
+          {% if kw %}
+            <span class="keyword-badge"
+                  style="background:#e7f7ef;border:1px solid #28a74599;color:#000;">
+              {{ kw|trim }}
+              <span class="keyword-remove">×</span>
+            </span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if pair.general_keywords.hindi %}
+      <div class="keyword-display-hi">
+        {% for kw in pair.general_keywords.hindi|split:"," %}
+          {% if kw %}
+            <span class="keyword-badge"
+                  style="background:#fff2e6;border:1px solid #ff8c0099;color:#000;">
+              {{ kw|trim }}
+              <span class="keyword-remove">×</span>
+            </span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
+
+
+
+              {% if pair.matched_subtopics %}
+              <div class="mt-3 subtopic-section">
+                <label><b>Matched Logical Subtopics</b></label>
+                <div class="subtopic-list mt-2">
+                  {% for st in pair.matched_subtopics %}
+                    <label class="d-block">
+                      <input type="checkbox" class="selected-subtopic" value="{{ st.subtopic }}">
+                      <span class="subtopic-chip" style="background:{{ st.area_color|default:'#777' }}">
+                        {{ st.area }} → {{ st.subtopic }}
+                      </span>
+                      <div class="reason-box">🧠 <b>Reason:</b> {{ st.reason }}<br>🎯 <b>Confidence:</b> {{ st.confidence|floatformat:2 }}</div>
+                    </label>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- Refinement Section (Unchanged) -->
+              <div class="refine-section mt-3">
+                <label><b>Refine AI Mapping by Selecting Scope</b></label><br>
+                <div class="btn-group mb-2" role="group">
+                  <button type="button" class="btn btn-sm btn-outline-dark scope-btn" data-scope="area">Area</button>
+                  <button type="button" class="btn btn-sm btn-outline-dark scope-btn" data-scope="part">Part</button>
+                  <button type="button" class="btn btn-sm btn-outline-dark scope-btn" data-scope="chapter">Chapter</button>
+                  <button type="button" class="btn btn-sm btn-outline-dark scope-btn" data-scope="topic">Topic</button>
+                </div>
+                <div class="scope-selector d-none mt-2">
+                  <div class="mb-2">
+                    <label class="small fw-bold">Select Area:</label>
+                    <select class="form-control form-select area-dropdown" multiple></select>
+                  </div>
+                  <div class="mb-2 d-none">
+                    <label class="small fw-bold">Select Part:</label>
+                    <select class="form-control form-select part-dropdown" multiple></select>
+                  </div>
+                  <div class="mb-2 d-none">
+                    <label class="small fw-bold">Select Chapter:</label>
+                    <select class="form-control form-select chapter-dropdown" multiple></select>
+                  </div>
+                  <div class="mb-2 d-none">
+                    <label class="small fw-bold">Select Topic:</label>
+                    <select class="form-control form-select topic-dropdown" multiple></select>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-primary mt-2 refine-ai-btn">🔄 Refine with AI</button>
+                </div>
+              </div>
+
+              <div class="mt-3 refined-results d-none">
+                <label><b>🔍 AI Suggested Subtopics (Filtered)</b></label>
+                <div class="refined-subtopic-list mt-2"></div>
+              </div>
+
+              <div class="text-end">
+                <button type="button" class="btn btn-success btn-save-final">💾 Save Keywords & Subtopics</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+<script>
+/* ---------- Toast ---------- */
+function showToast(msg, type = "success") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = `toast ${type}`;
+  t.style.display = "block";
+  setTimeout(() => (t.style.display = "none"), 3000);
+}
+
+/* ---------- Keyword Editing ---------- */
+document.addEventListener("click", (e) => {
+  if (!e.target.classList.contains("keyword-edit-btn")) return;
+  const p = e.target.closest(".mt-3");
+  const d = p.querySelector(".keyword-display-en,.keyword-display-hi");
+  const i = p.querySelector("input");
+  const editing = !i.classList.contains("d-none");
+
+  if (editing) {
+    const list = i.value.split(",").map((k) => k.trim()).filter(Boolean);
+    d.innerHTML = list
+      .map(
+        (k) =>
+          `<span class='keyword-badge keyword-new'>${k}<span class='keyword-remove'>×</span></span>`
+      )
+      .join("");
+    i.classList.add("d-none");
+    e.target.textContent = e.target.textContent.includes("(EN)")
+      ? "✏️ Edit Keywords (EN)"
+      : "✏️ Edit Keywords (HI)";
+  } else {
+    i.value = Array.from(d.querySelectorAll(".keyword-badge"))
+      .map((b) => b.textContent.replace("×", "").trim())
+      .join(", ");
+    i.classList.remove("d-none");
+    i.focus();
+    e.target.textContent = "💾 Done";
+  }
+});
+
+/* ---------- Remove Keyword ---------- */
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("keyword-remove"))
+    e.target.parentElement.remove();
+});
+
+/* ---------- HIERARCHY LOADER ---------- */
+document.addEventListener("click", async (e) => {
+  if (!e.target.classList.contains("scope-btn")) return;
+
+  const questionTypeSource =
+    document.querySelector("#questionTypeSelector")?.value || "modern";
+
+  const section = e.target.closest(".refine-section");
+  const selector = section.querySelector(".scope-selector");
+  selector.classList.remove("d-none");
+
+  section.querySelectorAll(".scope-btn").forEach((b) => b.classList.remove("active"));
+  e.target.classList.add("active");
+
+  const areaDropdown = selector.querySelector(".area-dropdown");
+  const partDropdown = selector.querySelector(".part-dropdown");
+  const chapterDropdown = selector.querySelector(".chapter-dropdown");
+  const topicDropdown = selector.querySelector(".topic-dropdown");
+
+  [areaDropdown, partDropdown, chapterDropdown, topicDropdown].forEach((d) => {
+    d.innerHTML = "";
+    d.parentElement.classList.add("d-none");
+  });
+
+  async function fetchList(url, params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(query ? `${url}?${query}` : url);
+    if (!res.ok) throw new Error("Network error");
+    return await res.json();
+  }
+
+  // Load Areas
+  if (e.target.dataset.scope === "area") {
+    areaDropdown.parentElement.classList.remove("d-none");
+    areaDropdown.innerHTML = "<option>⏳ Loading Areas...</option>";
+
+    try {
+      const data = await fetchList("/question-bank/get-areas/");
+      const key = Object.keys(data)[0];
+      const list = data[key] || [];
+
+      if (!list.length) {
+        areaDropdown.innerHTML = "<option disabled>No areas found</option>";
+        return;
+      }
+
+      areaDropdown.innerHTML = list
+        .map((a) => `<option value="${a.id || a.area_SI_Code}">${a.name}</option>`)
+        .join("");
+    } catch (err) {
+      console.error(err);
+      areaDropdown.innerHTML = "<option disabled>Error loading areas</option>";
+    }
+  }
+});
+
+/* ---------- AREA → PART ---------- */
+document.addEventListener("change", async (e) => {
+  if (!e.target.classList.contains("area-dropdown")) return;
+
+  const questionTypeSource =
+    document.querySelector("#questionTypeSelector")?.value || "modern";
+  const selector = e.target.closest(".scope-selector");
+  const partDropdown = selector.querySelector(".part-dropdown");
+  const chapterDropdown = selector.querySelector(".chapter-dropdown");
+  const topicDropdown = selector.querySelector(".topic-dropdown");
+
+  [partDropdown, chapterDropdown, topicDropdown].forEach((d) => {
+    d.innerHTML = "";
+    d.parentElement.classList.add("d-none");
+  });
+
+  const selected = Array.from(e.target.selectedOptions).map((o) => o.value);
+  if (!selected.length) return;
+
+  partDropdown.parentElement.classList.remove("d-none");
+  partDropdown.innerHTML = "<option>⏳ Loading Parts...</option>";
+
+  try {
+    let list = [];
+    if (questionTypeSource === "pyq") {
+      const sectionRes = await fetch(
+        `/question-bank/get-sections-list/?area_ids[]=${selected.join("&area_ids[]=")}`
+      );
+      const sectionJson = await sectionRes.json();
+      const sKey = Object.keys(sectionJson)[0];
+      const sections = sectionJson[sKey] || [];
+
+      if (!sections.length) {
+        partDropdown.innerHTML = "<option disabled>No sections found</option>";
+        return;
+      }
+
+      const sectionIds = sections.map((s) => s.section_Unit_SI);
+      const partRes = await fetch(
+        `/question-bank/get-parts-list/?section_ids[]=${sectionIds.join("&section_ids[]=")}`
+      );
+      const partJson = await partRes.json();
+      const key = Object.keys(partJson)[0];
+      list = partJson[key] || [];
+    } else {
+      const partRes = await fetch(
+        `/question-bank/get-parts-by-area/?area_ids[]=${selected.join("&area_ids[]=")}`
+      );
+      const json = await partRes.json();
+      const key = Object.keys(json)[0];
+      list = json[key] || [];
+    }
+
+    if (!list.length) {
+      partDropdown.innerHTML = "<option disabled>No parts found</option>";
+      return;
+    }
+
+    partDropdown.innerHTML = list
+      .map((p) => `<option value="${p.part_serial}">${p.name}</option>`)
+      .join("");
+  } catch (err) {
+    console.error(err);
+    partDropdown.innerHTML = "<option disabled>Error loading parts</option>";
+  }
+});
+
+/* ---------- PART → CHAPTER ---------- */
+document.addEventListener("change", async (e) => {
+  if (!e.target.classList.contains("part-dropdown")) return;
+
+  const selector = e.target.closest(".scope-selector");
+  const chapterDropdown = selector.querySelector(".chapter-dropdown");
+  const topicDropdown = selector.querySelector(".topic-dropdown");
+
+  [chapterDropdown, topicDropdown].forEach((d) => {
+    d.innerHTML = "";
+    d.parentElement.classList.add("d-none");
+  });
+
+  const selected = Array.from(e.target.selectedOptions).map((o) => o.value);
+  if (!selected.length) return;
+
+  chapterDropdown.parentElement.classList.remove("d-none");
+  chapterDropdown.innerHTML = "<option>⏳ Loading Chapters...</option>";
+
+  try {
+    const res = await fetch(
+      `/question-bank/get-chapters-list/?part_ids[]=${selected.join("&part_ids[]=")}`
+    );
+    const json = await res.json();
+    const key = Object.keys(json)[0];
+    const list = json[key] || [];
+
+    if (!list.length) {
+      chapterDropdown.innerHTML = "<option disabled>No chapters found</option>";
+      return;
+    }
+
+    chapterDropdown.innerHTML = list
+      .map((c) => `<option value="${c.chapter_number}">${c.name}</option>`)
+      .join("");
+  } catch (err) {
+    console.error(err);
+    chapterDropdown.innerHTML = "<option disabled>Error loading chapters</option>";
+  }
+});
+
+/* ---------- CHAPTER → TOPIC ---------- */
+document.addEventListener("change", async (e) => {
+  if (!e.target.classList.contains("chapter-dropdown")) return;
+
+  const selector = e.target.closest(".scope-selector");
+  const topicDropdown = selector.querySelector(".topic-dropdown");
+
+  topicDropdown.innerHTML = "";
+  topicDropdown.parentElement.classList.add("d-none");
+
+  const selected = Array.from(e.target.selectedOptions).map((o) => o.value);
+  if (!selected.length) return;
+
+  topicDropdown.parentElement.classList.remove("d-none");
+  topicDropdown.innerHTML = "<option>⏳ Loading Topics...</option>";
+
+  try {
+    const res = await fetch(
+      `/question-bank/get-topics-list/?chapter_ids[]=${selected.join("&chapter_ids[]=")}`
+    );
+    const json = await res.json();
+    const key = Object.keys(json)[0];
+    const list = json[key] || [];
+
+    if (!list.length) {
+      topicDropdown.innerHTML = "<option disabled>No topics found</option>";
+      return;
+    }
+
+    topicDropdown.innerHTML = list
+      .map((t) => `<option value="${t.topic_SI_number}">${t.name}</option>`)
+      .join("");
+  } catch (err) {
+    console.error(err);
+    topicDropdown.innerHTML = "<option disabled>Error loading topics</option>";
+  }
+});
+
+/* ---------- REFINE WITH AI ---------- */
+document.addEventListener("click", async (e) => {
+  if (!e.target.classList.contains("refine-ai-btn")) return;
+
+  const section = e.target.closest(".refine-section");
+  const selector = section.querySelector(".scope-selector");
+  const refinedDiv = section.parentElement.querySelector(".refined-results");
+  const refinedList = refinedDiv.querySelector(".refined-subtopic-list");
+  const csrf = document.getElementById("globalCsrf").value;
+  const qid = document.querySelector('[name="original_question_id"]').value;
+
+  const activeDropdown =
+    selector.querySelector(".topic-dropdown:not(.d-none)") ||
+    selector.querySelector(".chapter-dropdown:not(.d-none)") ||
+    selector.querySelector(".part-dropdown:not(.d-none)") ||
+    selector.querySelector(".area-dropdown:not(.d-none)");
+
+  if (!activeDropdown) {
+    showToast("⚠️ Please select a scope and values first.", "error");
+    return;
+  }
+
+  const ids = Array.from(activeDropdown.selectedOptions).map((o) => o.value);
+  const type = activeDropdown.classList.contains("topic-dropdown")
+    ? "topic"
+    : activeDropdown.classList.contains("chapter-dropdown")
+    ? "chapter"
+    : activeDropdown.classList.contains("part-dropdown")
+    ? "part"
+    : "area";
+
+  refinedDiv.classList.remove("d-none");
+  refinedList.innerHTML = "⏳ Refining suggestions...";
+
+  try {
+    const res = await fetch("/question-bank/api/refine_subtopics_by_scope/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrf,
+      },
+      body: JSON.stringify({
+        question_id: qid,
+        scope_type: type,
+        selected_ids: ids,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.status === "success" && Array.isArray(data.data)) {
+      refinedList.innerHTML = data.data
+      .map(
+        (st) => `
+      <label class="d-block">
+        <input type="checkbox" class="refined-subtopic" value="${st.subtopic.trim()}">
+        <span class="subtopic-chip" style="background:${st.area_color || '#777'}">
+          ${st.area || 'General'} → ${st.subtopic}
+        </span>
+        <div class="reason-box">
+          🧠 <b>Reason:</b> ${st.reason || '—'}<br>
+          🎯 <b>Confidence:</b> ${(st.confidence * 100).toFixed(1)}%
+        </div>
+      </label>`
+      )
+      .join("");
+
+
+      showToast("✅ AI Refinement complete!", "success");
+    } else {
+      refinedList.innerHTML = "❌ No refined subtopics found.";
+    }
+  } catch (err) {
+    console.error(err);
+    refinedList.innerHTML = "❌ Error refining subtopics.";
+    showToast("Network error.", "error");
+  }
+});
+
+/* ---------- SAVE KEYWORDS & SUBTOPICS ---------- */
+document.addEventListener("click", async (e) => {
+  if (!e.target.classList.contains("btn-save-final")) return;
+
+  const btn = e.target;
+  btn.classList.add("loading");
+  btn.disabled = true;
+
+  const pair = btn.closest(".single-pair");
+  const qid = document.querySelector('[name="original_question_id"]').value;
+  const csrf = document.getElementById("globalCsrf").value;
+
+  const en = Array.from(pair.querySelectorAll(".keyword-display-en .keyword-badge"))
+    .map((el) => el.textContent.replace("×", "").trim())
+    .join(", ");
+  const hi = Array.from(pair.querySelectorAll(".keyword-display-hi .keyword-badge"))
+    .map((el) => el.textContent.replace("×", "").trim())
+    .join(", ");
+  const subs = Array.from(
+    pair.querySelectorAll(".selected-subtopic:checked,.refined-subtopic:checked")
+  ).map((el) => el.value.trim());
+
+  try {
+    const res = await fetch("/question-bank/update-question-keywords/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrf,
+      },
+      body: JSON.stringify({
+        question_id: qid,
+        english_keywords: en,
+        hindi_keywords: hi,
+        subtopics: subs,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.status === "success") {
+      showToast("✅ Saved successfully!", "success");
+
+      // Glow animation for selected subtopics
+      pair
+        .querySelectorAll(".selected-subtopic:checked,.refined-subtopic:checked")
+        .forEach((cb) => {
+          const chip = cb.closest("label")?.querySelector(".subtopic-chip");
+          if (chip) {
+            chip.classList.add("subtopic-glow");
+            setTimeout(() => chip.classList.remove("subtopic-glow"), 1800);
+          }
+        });
+    } else {
+      showToast("⚠️ Save failed", "error");
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Network error", "error");
+  }
+
+  btn.classList.remove("loading");
+  btn.disabled = false;
+});
+</script>
+
+

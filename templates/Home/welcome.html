@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="user-access" class="user-access section">
+    <div class="user-access-area">
+        <div class="container">
+            <div class="row justify-content-center align-items-center center-form">
+                <div class="col-lg-6 col-md-12">
+                    <form id="user-login-form" class="user-profile-form" method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="form-top-box">
+                            <h2 class="form-name">Login your Account</h2>
+                            <p class="form-text">Welcome back! Please enter your details.</p>
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="signin-email">Email Address</label>
+                                    {{ form.username }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="signin-password">Password</label>
+                                    {{ form.password }}
+                                    <div class="mt-2 text-end">
+                                        <a class="forgot-pass" href="#">Forgot password?</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-bottom-box">
+                            <button type="submit" class="btn btn-purple w-100 text-center">Log in</button>
+                            <p>Not registered? <a href="{% url 'register' %}">Create an Account</a></p>
+                        </div>
+
+                        <!-- Display Form Errors -->
+                        {% if form.errors %}
+                            <div class="alert alert-danger mt-3">
+                                <ul>
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

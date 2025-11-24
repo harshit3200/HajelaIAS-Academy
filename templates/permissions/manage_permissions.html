@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Permissions - Hajela's IAS{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Manage Permissions</h2>
+
+    <form method="post" class="card shadow p-4">
+        {% csrf_token %}
+
+        <!-- Select User -->
+        <div class="mb-3">
+            <label for="user" class="form-label">Select Staff / Student</label>
+            <select name="user_id" id="user" class="form-select" required onchange="this.form.submit()">
+                <option value="">-- Select User --</option>
+                {% for u in users %}
+                    <option value="{{ u.id }}" {% if selected_user and u.id == selected_user.id %}selected{% endif %}>
+                        {{ u.email }} ({{ u.get_user_type_display }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {% if selected_user %}
+        <hr>
+
+        <!-- Django Permissions -->
+        <h4 class="mb-3 text-success">Django Permissions</h4>
+        {% for app, models in grouped_permissions.items %}
+            <h5 class="mt-4 text-primary">{{ app|title }}</h5>
+            <div class="accordion" id="accordion-{{ app }}">
+                {% for model, perms in models.items %}
+                <div class="accordion-item">
+                    <h6 class="accordion-header" id="heading-{{ app }}-{{ model }}">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#collapse-{{ app }}-{{ model }}" 
+                                aria-expanded="false" aria-controls="collapse-{{ app }}-{{ model }}">
+                            {{ model|title }}
+                        </button>
+                    </h6>
+                    <div id="collapse-{{ app }}-{{ model }}" class="accordion-collapse collapse"
+                         aria-labelledby="heading-{{ app }}-{{ model }}" data-bs-parent="#accordion-{{ app }}">
+                        <div class="accordion-body">
+                            <div class="row">
+                                {% for perm in perms %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="permissions"
+                                               value="{{ perm.id }}"
+                                               id="perm_{{ perm.id }}"
+                                               {% if perm.id|stringformat:"s" in granted_permissions %}checked{% endif %}>
+                                        <label class="form-check-label" for="perm_{{ perm.id }}">
+                                            {{ perm.name }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <hr>
+
+        <!-- Custom Features -->
+        <h4 class="mb-3 text-success">Custom Features</h4>
+        <div class="row">
+            {% for feature in features %}
+            <div class="col-md-4 mb-2">
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="features"
+                           value="{{ feature.0 }}"
+                           id="feature_{{ feature.0 }}"
+                           {% if feature.0 in granted_features %}checked{% endif %}>
+                    <label class="form-check-label" for="feature_{{ feature.0 }}">
+                        {{ feature.1 }}
+                    </label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Submit -->
+        <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-success">Save Permissions</button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

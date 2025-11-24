@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}Filter Questions For Class Plus Doc{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Filters Section -->
+        <div class="col-lg-3">
+            <h4 class="mb-3">Filter Questions</h4>
+            <form method="GET" id="filterForm">
+                <div class="form-group">
+                    <label for="area">Area</label>
+                    <select name="area" id="area" class="form-control">
+                        <option value="">Select Area</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="section">Section</label>
+                    <select name="section" id="section" class="form-control">
+                        <option value="">Select Section</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="part">Part</label>
+                    <select name="part" id="part" class="form-control">
+                        <option value="">Select Part</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="chapter">Chapter</label>
+                    <select name="chapter" id="chapter" class="form-control">
+                        <option value="">Select Chapter</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="topic">Topic</label>
+                    <select name="topic" id="topic" class="form-control">
+                        <option value="">Select Topic</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="subtopic">Subtopic</label>
+                    <select name="subtopic" id="subtopic" class="form-control">
+                        <option value="">Select Subtopic</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="question_sub_type">Question Sub Type</label>
+                    <select name="question_sub_type" id="question_sub_type" class="form-control">
+                        <option value="">Select Question Sub Type</option>
+                        <option value="simple_type">Simple Type</option>
+                        <option value="r_and_a_type">R & A Type</option>
+                        <option value="list_type_1">List Type 1</option>
+                        <option value="list_type_2">List Type 2</option>
+                        <option value="true_and_false_type">True & False</option>
+                        <option value="fill_in_the_blank_type">Fill in the Blank</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="created_at">Created At</label>
+                    <input type="date" name="created_at" id="created_at" class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-2">Filter</button>
+            </form>
+        </div>
+
+        <!-- Questions Section -->
+        <div class="col-lg-9">
+            <h4 class="mb-3">Filtered Questions</h4>
+            <form method="POST" action="{% url 'generate-questions-document' %}">
+
+                {% csrf_token %}
+                <div class="mb-2">
+                    <button type="submit" class="btn btn-success">Generate Word Document</button>
+                </div>
+
+                {% if questions %}
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th><input type="checkbox" id="select-all" /></th>
+                                <th>Question</th>
+                                <th>Type</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for question in questions %}
+                                <tr>
+                                    <td><input type="checkbox" name="selected_questions" value="{{ question.id }}"></td>
+                                    <td>{{ question.question_part|default:"(No Text)"|truncatewords:20 }}</td>
+                                    <td>{{ question.question_sub_type }}</td>
+                                    <td>{{ question.created_at|date:"Y-m-d" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="alert alert-info">No questions found. Adjust filters to find results.</div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const area = document.getElementById('area');
+        const section = document.getElementById('section');
+        const part = document.getElementById('part');
+        const chapter = document.getElementById('chapter');
+        const topic = document.getElementById('topic');
+
+        // Fetch Areas initially
+        fetch('/question-bank/get-areas/')
+            .then(response => response.json())
+            .then(data => populateDropdown(area, data.areas, 'area_SI_Code'));
+
+        area.addEventListener('change', () => {
+            fetch(`/question-bank/get-sections-list/?area_ids[]=${area.value}`)
+                .then(res => res.json())
+                .then(data => {
+                    populateDropdown(section, data.sections, 'section_Unit_SI');
+                    resetDropdown(part);
+                    resetDropdown(chapter);
+                    resetDropdown(topic);
+                });
+        });
+
+        section.addEventListener('change', () => {
+            fetch(`/question-bank/get-parts-list/?section_ids[]=${section.value}`)
+                .then(res => res.json())
+                .then(data => {
+                    populateDropdown(part, data.parts, 'part_serial');
+                    resetDropdown(chapter);
+                    resetDropdown(topic);
+                });
+        });
+
+        part.addEventListener('change', () => {
+            fetch(`/question-bank/get-chapters-list/?part_ids[]=${part.value}`)
+                .then(res => res.json())
+                .then(data => {
+                    populateDropdown(chapter, data.chapters, 'chapter_number');
+                    resetDropdown(topic);
+                });
+        });
+
+        chapter.addEventListener('change', () => {
+            fetch(`/question-bank/get-topics-list/?chapter_ids[]=${chapter.value}`)
+                .then(res => res.json())
+                .then(data => {
+                    populateDropdown(topic, data.topics, 'topic_SI_number');
+                });
+        });
+
+        function populateDropdown(dropdown, data, idKey) {
+            dropdown.innerHTML = `<option value="">Select ${dropdown.getAttribute('name') || 'Option'}</option>`;
+            data.forEach(item => {
+                dropdown.innerHTML += `<option value="${item[idKey]}">${item.name}</option>`;
+            });
+            dropdown.disabled = false;
+        }
+
+        function resetDropdown(dropdown) {
+            dropdown.innerHTML = `<option value="">Select ${dropdown.getAttribute('name') || 'Option'}</option>`;
+            dropdown.disabled = true;
+        }
+
+        // ✅ Select All checkbox functionality
+        const selectAll = document.getElementById('select-all');
+        if (selectAll) {
+            selectAll.addEventListener('change', function () {
+                const checkboxes = document.querySelectorAll('input[name="selected_questions"]');
+                checkboxes.forEach(cb => {
+                    cb.checked = selectAll.checked;
+                });
+            });
+        }
+    });
+</script>
+
+{% endblock %}
