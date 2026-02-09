@@ -6301,17 +6301,49 @@ def view_questions(request):
     if question_sub_type:
         questions = questions.filter(question_sub_type=question_sub_type)
     if area_name:
-        questions = questions.filter(area_name__area_SI_Code=area_name)
+        questions = questions.filter(area_name=area_name)
+
     if section_name:
-        questions = questions.filter(section_name__section_Unit_SI=section_name)
+        questions = questions.filter(section_name=section_name)
+
     if part_name:
-        questions = questions.filter(part_name__part_serial=part_name)
+        questions = questions.filter(part_name=part_name)
+
     if chapter_name:
-        questions = questions.filter(chapter_name__chapter_number=chapter_name)
+        questions = questions.filter(chapter_name=chapter_name)
+
     if topic_name:
-        questions = questions.filter(topic_name__topic_SI_number=topic_name)
+        questions = questions.filter(topic_name=topic_name)
+
     if subtopic_name:
-        questions = questions.filter(subtopic_name__sub_topic_SI_Number=subtopic_name)
+        questions = questions.filter(subtopic_name=subtopic_name)
+
+
+
+     # ======================================================
+    # 🔥 LANGUAGE COUNTS (FILTER AWARE)
+    # ======================================================
+
+    total_questions = (
+    questions
+    .values('base_question_id')
+    .distinct()
+    .count()
+    )
+ 
+    total_english = (
+        questions.filter(language='e')
+        .values('base_question_id')
+        .distinct()
+        .count()
+    )
+
+    total_hindi = (
+        questions.filter(language='h')
+        .values('base_question_id')
+        .distinct()
+        .count()
+    )
 
     questions = questions.distinct()  # Ensure distinct questions
 
@@ -6350,6 +6382,11 @@ def view_questions(request):
         'subtopics': SubTopicName.objects.all(),
         'request': request,
         'page_obj': page_obj,  # Add page_obj for pagination
+
+          # 🔥 NEW COUNTS
+        'total_questions': total_questions,
+        'total_english': total_english,
+        'total_hindi': total_hindi,
     }
     return render(request, 'question_bank/add_question/view_questions.html', context)
 
